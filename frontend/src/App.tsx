@@ -37,6 +37,8 @@ export default function App() {
     fetchEscrow,
     createEscrow,
     submitWorkForReview,
+    denyMilestone,
+    claimInactivityPayout,
     approveMilestone,
     refundExpired,
   } = useEscrow();
@@ -58,7 +60,7 @@ export default function App() {
     fetchEscrow(publicKey);
   }, [fetchEscrow, publicKey]);
 
-  // Sync wallet error state (e.g. extension not installed) to top notification banner
+  // Sync wallet error state to top notification banner
   useEffect(() => {
     if (walletError) {
       setBannerError(walletError);
@@ -72,13 +74,15 @@ export default function App() {
     }
   }, [escrowError]);
 
-  // Handler for escrow creation
+  // Handler for escrow creation (V2 Multi-Sig Parameters)
   const handleCreateEscrowSubmit = async (
     clientName: string,
     clientEmail: string,
     freelancer: string,
     freelancerName: string,
     freelancerEmail: string,
+    cosigner1: string,
+    cosigner2: string,
     token: string,
     totalAmount: string,
     deadline: number,
@@ -96,6 +100,8 @@ export default function App() {
       freelancer,
       freelancerName,
       freelancerEmail,
+      cosigner1,
+      cosigner2,
       token,
       totalAmount,
       deadline,
@@ -131,7 +137,7 @@ export default function App() {
                 </div>
                 <button
                   onClick={() => setBannerError(null)}
-                  className="p-1 hover:bg-rose-900/60 rounded-lg text-rose-400 transition"
+                  className="p-1 hover:bg-rose-900/60 rounded-lg text-rose-400 transition cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -175,10 +181,25 @@ export default function App() {
                   isFetching={isFetching}
                   isSubmitting={isSubmitting}
                   onFetchEscrow={handleFetchEscrow}
-                  onSubmitWorkForReview={submitWorkForReview}
+                  onSubmitWorkForReview={async (id: number, targetEscrow?: Escrow) => {
+                    if (publicKey) {
+                      await submitWorkForReview(publicKey, id, targetEscrow);
+                    }
+                  }}
                   onApproveMilestone={async (id: number, targetEscrow?: Escrow) => {
                     if (publicKey) {
                       await approveMilestone(publicKey, id, targetEscrow);
+                      await refreshBalance();
+                    }
+                  }}
+                  onDenyMilestone={async (id: number, reason: string, targetEscrow?: Escrow) => {
+                    if (publicKey) {
+                      await denyMilestone(publicKey, id, reason, targetEscrow);
+                    }
+                  }}
+                  onClaimInactivityPayout={async (id: number, targetEscrow?: Escrow) => {
+                    if (publicKey) {
+                      await claimInactivityPayout(publicKey, id, targetEscrow);
                       await refreshBalance();
                     }
                   }}
@@ -245,7 +266,7 @@ export default function App() {
         {/* Global Footer */}
         <footer className="border-t border-slate-900 bg-slate-950/80 backdrop-blur-md py-6 text-center text-xs text-slate-500 mt-12">
           <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono">
-            <span>StellarFlow © 2026 — Soroban Non-Custodial Smart Escrow</span>
+            <span>StellarFlow © 2026 — Soroban Non-Custodial Smart Escrow V2</span>
             <span className="text-slate-600">
               Contract ID:{' '}
               <a

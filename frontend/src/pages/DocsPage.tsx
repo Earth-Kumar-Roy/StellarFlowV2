@@ -9,7 +9,9 @@ import {
   Layers,
   Cpu,
   ShieldCheck,
-  Terminal
+  Terminal,
+  Clock,
+  Users
 } from 'lucide-react';
 
 export const DocsPage = () => {
@@ -24,13 +26,13 @@ export const DocsPage = () => {
         <div className="relative z-10 max-w-3xl space-y-4">
           <div className="inline-flex items-center space-x-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-xs font-mono font-bold">
             <Zap className="w-3.5 h-3.5" />
-            <span>Soroban Smart Escrow Architecture v1.0</span>
+            <span>Soroban Smart Escrow Architecture v2.0</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
             StellarFlow Documentation & System Architecture
           </h1>
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
-            StellarFlow is a non-custodial, milestone-based escrow platform built on Stellar's Soroban smart contract framework. It ensures cryptographically locked funds, programmatic multi-stage payouts, and real-time transaction audit trails integrated with off-chain logging and notification microservices.
+            StellarFlow is a non-custodial, milestone-based escrow platform built on Stellar's Soroban smart contract framework. It features cryptographically locked funds, 2-of-3 multi-sig governance for high-value agreements (&gt;5,000 XLM), client inactivity auto-payout protection, and automated PDF settlement invoice generation.
           </p>
           <div className="pt-2 flex flex-wrap items-center gap-4">
             <a
@@ -49,7 +51,7 @@ export const DocsPage = () => {
               className="inline-flex items-center space-x-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 font-sans font-bold text-xs px-5 py-3.5 rounded-xl border border-slate-700 transition"
             >
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Verify On-Chain Ledger</span>
+              <span>Verify On-Chain Contract ({STELLAR_CONFIG.contractId.substring(0, 6)}...{STELLAR_CONFIG.contractId.substring(STELLAR_CONFIG.contractId.length - 4)})</span>
             </a>
           </div>
         </div>
@@ -59,7 +61,7 @@ export const DocsPage = () => {
       <section className="space-y-6">
         <h2 className="text-xl font-black text-white flex items-center justify-center space-x-2 text-center">
           <Layers className="w-6 h-6 text-indigo-400" />
-          <span>System Architecture & Operational Diagram</span>
+          <span>System Architecture & Governance Flow</span>
         </h2>
 
         {/* Centered Architecture Flow Box */}
@@ -67,86 +69,125 @@ export const DocsPage = () => {
           <div className="border-b border-slate-800 pb-3 text-slate-400 flex flex-col sm:flex-row justify-between items-center w-full gap-2">
             <span className="flex items-center space-x-2">
               <Terminal className="w-4 h-4 text-indigo-400" />
-              <span>Core Architectural Flow</span>
+              <span>Soroban V2 Multi-Sig & Inactivity Protocol Flow</span>
             </span>
-            <span className="text-[10px] text-indigo-400 font-bold">On-Chain Payout & Reputation Indexing</span>
+            <span className="text-[10px] text-indigo-400 font-bold">2-of-3 Multi-Sig Threshold (&gt;5k XLM)</span>
           </div>
 
           <div className="w-full overflow-x-auto flex justify-center py-2">
             <pre className="text-indigo-300 leading-relaxed font-mono text-left inline-block">
-{`   ┌───────────────────┐    Soroban Contract    ┌────────────────────────┐
-   │   Client Wallet   │ ──────(Locks XLM)─────►│  Milestone Vault Core  │
-   └─────────┬─────────┘                        └───────────┬────────────┘
-             │                                              │
-             │ (Approves Deliverables)                      │ (Executes Payout)
-             │                                              ▼
-             │                                  ┌────────────────────────┐
-             └─────────────────────────────────►│   Freelancer Wallet    │
-                                                └───────────┬────────────┘
-                                                            │
-    ┌───────────────────────────────────────────────┐       │
-    │           Counterparty Evaluation             │◄──────┘
-    ├───────────────────────┬───────────────────────┤
-    │  Client Rates On:     │ Freelancer Rates On:  │
-    │  • Code & Deliverables│  • Approval Speed     │
-    │  • Deadline Adherence │  • Requirement Clarity│
-    └───────────┬───────────┴───────────┬───────────┘
-                │                       │
-                └───────────┬───────────┘
-                            │
-                            ▼
-              ┌───────────────────────────┐
-              │ Decentralized Reputation  │
-              │  & Audit Indexer Engine   │
-              └─────────────┬─────────────┘
-                            │
-                            ▼
-              ┌───────────────────────────┐
-              │ Live Community Reputation │
-              │     & Feed Dashboard      │
-              └───────────────────────────┘`}
+{`   ┌───────────────────┐    Locks Tokens (>5k XLM)  ┌────────────────────────┐
+   │   Client Wallet   │ ──────────────────────────►│  Soroban Escrow Vault  │
+   └─────────┬─────────┘                            └───────────┬────────────┘
+             │                                                  │
+             │ (Work Deliverable Submitted)                     │
+             ▼                                                  │
+   ┌───────────────────┐    Inactivity Protection Timer         │
+   │ Freelancer Wallet │◄───────────────────────────────────────┤
+   └─────────┬─────────┘    • 48 Hours Inactive  ─► Claim 10%    │
+             │              • Extended Inactive  ─► Claim 40%    │
+             │                                                  │
+             │ (Direct Approval or 2-of-3 Governance Voting)      │
+             ├──────────────────────────────────────────────────┤
+             │                                                  │
+   ┌─────────┴─────────┐    Governance Signatures              │
+   │ Multi-Sig Signers │ ───────────────────────────────────────┤
+   │ (Co-Signer 1 & 2) │    (Requires 2-of-3 Vote Threshold)    │
+   └───────────────────┘                                        │
+                                                                ▼
+   ┌───────────────────┐    Settlement & PDF Generation ┌────────────────────────┐
+   │ Client Feedback & │◄───────────────────────────────│  InvoiceMaker Engine   │
+   │ Reputation Audit  │    (On-Chain Released Balance) └────────────────────────┘
+   └───────────────────┘`}
             </pre>
           </div>
         </div>
 
         {/* 3-Column Layer Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
-          {/* Layer 1: Web3 Client */}
           <div className="bg-slate-900/80 border border-slate-800/80 p-5 rounded-2xl space-y-3">
             <div className="flex items-center space-x-2 text-indigo-400 font-bold border-b border-slate-800/80 pb-2">
               <Cpu className="w-4 h-4" />
-              <span>1. Web3 Client Layer</span>
+              <span>1. Web3 Client & Invoice Layer</span>
             </div>
             <ul className="space-y-2 text-slate-400 leading-relaxed">
               <li>• <strong className="text-slate-200">Freighter Wallet:</strong> Signer & Keypair Manager</li>
-              <li>• <strong className="text-slate-200">React + Vite:</strong> Reactive State Engine</li>
-              <li>• <strong className="text-slate-200">Stellar SDK:</strong> Transaction Builder & XDR Encoder</li>
+              <li>• <strong className="text-slate-200">InvoiceMaker.tsx:</strong> Single-page PDF settlement generator</li>
+              <li>• <strong className="text-slate-200">Stellar SDK:</strong> XDR Builder & RPC Simulation Engine</li>
             </ul>
           </div>
 
-          {/* Layer 2: On-Chain Soroban */}
           <div className="bg-slate-900/80 border border-slate-800/80 p-5 rounded-2xl space-y-3">
             <div className="flex items-center space-x-2 text-emerald-400 font-bold border-b border-slate-800/80 pb-2">
               <ShieldCheck className="w-4 h-4" />
-              <span>2. On-Chain Ledger Layer</span>
+              <span>2. On-Chain Soroban Governance</span>
             </div>
             <ul className="space-y-2 text-slate-400 leading-relaxed">
-              <li>• <strong className="text-slate-200">Soroban Contract:</strong> Milestone Vault Logic</li>
-              <li>• <strong className="text-slate-200">XLM SAC Address:</strong> Token Standard Transfers</li>
-              <li>• <strong className="text-slate-200">Stellar Testnet:</strong> Consensus & State Persistence</li>
+              <li>• <strong className="text-slate-200">Soroban Contract:</strong> Multi-sig vault & milestone logic</li>
+              <li>• <strong className="text-slate-200">2-of-3 Multi-Sig:</strong> Co-signer governance for &gt;5k XLM</li>
+              <li>• <strong className="text-slate-200">Inactivity Protection:</strong> Automated 10%/40% claims</li>
             </ul>
           </div>
 
-          {/* Layer 3: Audit & Notifications */}
           <div className="bg-slate-900/80 border border-slate-800/80 p-5 rounded-2xl space-y-3">
             <div className="flex items-center space-x-2 text-violet-400 font-bold border-b border-slate-800/80 pb-2">
               <Database className="w-4 h-4" />
               <span>3. Audit & Indexing Layer</span>
             </div>
             <ul className="space-y-2 text-slate-400 leading-relaxed">
-              <li>• <strong className="text-slate-200">Google Apps Script:</strong> REST API Webhook Server</li>
-              <li>• <strong className="text-slate-200">Google Sheets:</strong> Permanent Transaction Audit Trail</li>
-              <li>• <strong className="text-slate-200">MailApp Service:</strong> Automated Email Notifications</li>
+              <li>• <strong className="text-slate-200">Google Apps Script:</strong> Concurrency-locked REST API</li>
+              <li>• <strong className="text-slate-200">TransactionsV2 & FeedbacksV2:</strong> Audit sheets</li>
+              <li>• <strong className="text-slate-200">MailApp Service:</strong> Automated notification dispatch</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Protocol Rules */}
+      <section className="space-y-6">
+        <h2 className="text-xl font-black text-white flex items-center space-x-2">
+          <Clock className="w-6 h-6 text-amber-400" />
+          <span>Protocol Security & Protection Rules</span>
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-slate-900/80 border border-amber-500/30 p-6 rounded-3xl space-y-3 shadow-lg shadow-amber-950/20">
+            <div className="flex items-center space-x-2 text-amber-400 font-bold text-sm">
+              <Zap className="w-5 h-5" />
+              <span>Freelancer Inactivity Protection</span>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed font-sans">
+              To prevent funds from being permanently frozen by an inactive client after work submission, StellarFlow enforces an automated lock window:
+            </p>
+            <ul className="space-y-2 text-xs font-mono text-slate-400">
+              <li className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                <strong className="text-amber-300 block mb-0.5">Tier 1 (48 Hours Inactive):</strong>
+                Unlocks <strong className="text-white">10% partial auto-payout</strong> claimable directly on-chain by the freelancer.
+              </li>
+              <li className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                <strong className="text-amber-300 block mb-0.5">Tier 2 (Extended Inactivity / Deadline):</strong>
+                Unlocks up to <strong className="text-white">40% maximum payout cap</strong> if client review continues to be inactive.
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-slate-900/80 border border-violet-500/30 p-6 rounded-3xl space-y-3 shadow-lg shadow-violet-950/20">
+            <div className="flex items-center space-x-2 text-violet-400 font-bold text-sm">
+              <Users className="w-5 h-5" />
+              <span>High-Value Multi-Sig Governance (&gt;5,000 XLM)</span>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed font-sans">
+              High-value project agreements exceeding 5,000 XLM automatically trigger 2-of-3 multi-sig governance rules:
+            </p>
+            <ul className="space-y-2 text-xs font-mono text-slate-400">
+              <li className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                <strong className="text-violet-300 block mb-0.5">Governance Board:</strong>
+                Requires sign-off from Client + 2 Designated Governance Co-Signers.
+              </li>
+              <li className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                <strong className="text-violet-300 block mb-0.5">2-of-3 Approval Threshold:</strong>
+                At least <strong className="text-white">2 approval votes</strong> must be recorded on-chain before milestone funds release to the freelancer.
+              </li>
             </ul>
           </div>
         </div>
@@ -159,14 +200,14 @@ export const DocsPage = () => {
           <span>Execution Workflow Pipeline</span>
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl space-y-2 relative">
             <div className="w-8 h-8 bg-indigo-600/20 text-indigo-400 font-mono font-bold rounded-xl flex items-center justify-center border border-indigo-500/30 text-xs">
               01
             </div>
             <h3 className="text-sm font-bold text-white">Create & Lock</h3>
             <p className="text-xs text-slate-400 leading-relaxed font-sans">
-              Client signs <code className="text-indigo-300">create_escrow</code> via Freighter. Tokens move from Client to Soroban Contract Vault.
+              Client signs <code className="text-indigo-300">create_escrow</code>. Funds lock on-chain. Contracts &gt;5k XLM register 2 Co-Signers.
             </p>
           </div>
 
@@ -176,27 +217,37 @@ export const DocsPage = () => {
             </div>
             <h3 className="text-sm font-bold text-white">Work Submission</h3>
             <p className="text-xs text-slate-400 leading-relaxed font-sans">
-              Freelancer submits deliverable for a milestone. Work review flag logs to local metadata & Google Sheets.
+              Freelancer submits deliverable. On-chain state marks milestone under review and starts 48h inactivity protection timer.
+            </p>
+          </div>
+
+          <div className="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl space-y-2 relative">
+            <div className="w-8 h-8 bg-violet-600/20 text-violet-400 font-mono font-bold rounded-xl flex items-center justify-center border border-violet-500/30 text-xs">
+              03
+            </div>
+            <h3 className="text-sm font-bold text-white">Multi-Sig Vote / Review</h3>
+            <p className="text-xs text-slate-400 leading-relaxed font-sans">
+              Client or Co-Signer executes <code className="text-violet-300">approve_milestone</code> vote (requires 2-of-3 threshold for &gt;5k XLM).
             </p>
           </div>
 
           <div className="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl space-y-2 relative">
             <div className="w-8 h-8 bg-emerald-600/20 text-emerald-400 font-mono font-bold rounded-xl flex items-center justify-center border border-emerald-500/30 text-xs">
-              03
+              04
             </div>
-            <h3 className="text-sm font-bold text-white">Approve & Release</h3>
+            <h3 className="text-sm font-bold text-white">Release & Invoice</h3>
             <p className="text-xs text-slate-400 leading-relaxed font-sans">
-              Client invokes <code className="text-emerald-300">approve_milestone</code>. Contract executes token transfer to Freelancer.
+              Once fully settled, funds release to freelancer and unlock downloadable PDF audit invoices via <code className="text-emerald-300">InvoiceMaker.tsx</code>.
             </p>
           </div>
 
           <div className="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl space-y-2 relative">
             <div className="w-8 h-8 bg-rose-600/20 text-rose-400 font-mono font-bold rounded-xl flex items-center justify-center border border-rose-500/30 text-xs">
-              04
+              05
             </div>
             <h3 className="text-sm font-bold text-white">Refund Protection</h3>
             <p className="text-xs text-slate-400 leading-relaxed font-sans">
-              If deadline passes, Client executes <code className="text-rose-300">refund_expired</code> to withdraw remaining unreleased funds.
+              If deadline passes, Client executes <code className="text-rose-300">refund_expired</code> to reclaim unreleased tokens.
             </p>
           </div>
         </div>
@@ -214,12 +265,12 @@ export const DocsPage = () => {
 {`StellarFlow/
 ├── contracts/
 │   └── escrow/
-│       ├── Cargo.toml               <-- Rust Dependencies & Soroban SDK configuration
+│       ├── Cargo.toml              <-- Rust Dependencies & Soroban SDK configuration
 │       └── src/
-│           ├── lib.rs               <-- Escrow Contract logic & token transfer invocations
-│           ├── types.rs             <-- Data structures (Escrow, Milestone) & custom error enums
-│           ├── storage.rs           <-- Soroban Instance Storage keys & persistence helpers
-│           └── test.rs              <-- Soroban unit tests
+│           ├── lib.rs              <-- Escrow Contract logic, Multi-Sig & Inactivity Payouts
+│           ├── types.rs            <-- Data structures (Escrow, Milestone) & custom error enums
+│           ├── storage.rs          <-- Soroban Instance Storage keys & persistence helpers
+│           └── test.rs             <-- Soroban unit tests
 ├── frontend/
 │   ├── public/
 │   │   └── favicon.svg
@@ -232,19 +283,19 @@ export const DocsPage = () => {
 │   │   │   └── api.ts              <-- API fetchers for Google Apps Script sheet logs
 │   │   ├── hooks/
 │   │   │   ├── useWallet.ts        <-- Freighter integration & live XLM balance tracker
-│   │   │   └── useEscrow.ts        <-- Soroban contract calls & auto-logging triggers
+│   │   │   └── useEscrow.ts        <-- Soroban contract calls & V2 auto-logging triggers
 │   │   ├── components/
 │   │   │   ├── Navbar.tsx          <-- Multi-page Navigation, XLM Balance & Role Badges
 │   │   │   ├── Toast.tsx           <-- On-chain transaction status toasts
-│   │   │   ├── MilestoneTracker.tsx<-- Milestone submission & review UI
-│   │   │   ├── CountdownTimer.tsx  <-- Expiration deadline counter
+│   │   │   ├── MilestoneTracker.tsx<-- Milestone submission, multi-sig voting & inactivity UI
 │   │   │   ├── EscrowCard.tsx      <-- Primary contract management interface
+│   │   │   ├── InvoiceMaker.tsx    <-- Single-page PDF settlement invoice generator
 │   │   │   └── FeedbackModal.tsx   <-- On-chain reputation & sheet logger modal
 │   │   ├── pages/
 │   │   │   ├── Dashboard.tsx       <-- Main Operations Dashboard
 │   │   │   ├── CreateEscrowPage.tsx<-- Full-page contract creation form
-│   │   │   ├── HistoryPage.tsx     <-- Audit Logs (Testnet RPC Events vs. Google Sheets)
-│   │   │   ├── FeedbackPage.tsx    <-- Public Counterparty Reputation Feed
+│   │   │   ├── HistoryPage.tsx     <-- Audit Logs (TransactionsV2 & Soroban RPC)
+│   │   │   ├── FeedbackPage.tsx    <-- Public Counterparty Reputation Feed (FeedbacksV2)
 │   │   │   └── DocsPage.tsx        <-- Interactive Technical Documentation (This Page)
 │   │   ├── App.tsx                 <-- React Router configuration & global layout
 │   │   ├── main.tsx                <-- Entry point
