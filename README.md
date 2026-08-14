@@ -45,6 +45,40 @@ https://docs.google.com/presentation/d/1WEC3J_Z2Bjo8hUsZjZebJixIetrs9Nz2/edit?us
 
 ---
 
+## 📈 Feedback-Driven Product Improvements & Next Phase Evolution
+
+Based on comprehensive evaluation and feedback collected from 50+ testnet users across our [User Onboarding & Feedback Sheet](https://docs.google.com/spreadsheets/d/14RQ2lbUCWGO36NkopM9LQS3qh0IovK_A1FJGf32xE3U/edit?gid=449051969#gid=449051969), we implemented immediate core architectural upgrades and established our next-phase development roadmap.
+
+---
+
+### 🛠️ Key Improvements Implemented in this Phase (with Commits)
+
+1. **Single-Page PDF Settlement Invoicing Engine (`InvoiceMaker.tsx`)**
+   * **User Feedback Addressed**: Users reported browser print issues where entire background dashboards were captured across multiple pages with missing dark/light styles and clipped text.
+   * **Implemented Solution**: Built an isolated, client-side PDF export engine that generates a single-page, white-background settlement invoice with responsive stacked wallet address formatting and zero external CDN dependency.
+   * **Git Commit**: [`b6711943b5697ebf49758bbcda748961734ce634`](https://github.com/Earth-Kumar-Roy/StellarFlowV2/commit/b6711943b5697ebf49758bbcda748961734ce634) — *`feat(ui): build isolated single-page pdf settlement invoice generator`*
+
+2. **Interactive 2-of-3 Multi-Sig Governance & Voting Interface (`MilestoneTracker.tsx`)**
+   * **User Feedback Addressed**: Testers requested clear visual indicators showing how many votes were recorded and who had already voted for contracts exceeding 5,000 XLM.
+   * **Implemented Solution**: Added dynamic voting indicators (`voteCount/2`), disabled double-voting states per active wallet address, and integrated explicit governance badge tags across milestones.
+   * **Git Commit**: [`f61f8da2d5388e14e876da11508a21a94ddb58a5`](https://github.com/Earth-Kumar-Roy/StellarFlowV2/commit/f61f8da2d5388e14e876da11508a21a94ddb58a5) — *`feat(ui): build interactive milestone review cards with multi-sig governance voting`*
+
+---
+
+### 🔮 Next-Phase Evolution Roadmap (Driven by User Feedback)
+
+1. **Multi-Asset Support (USDC / SAC Custom Tokens)**:
+   * Expand Soroban smart contract vaults beyond native XLM to allow locking and releasing of stablecoins (USDC) via the Stellar Asset Contract (SAC) standard.
+2. **Automated Notification Dispatch & Inactivity Alerts**:
+   * Integrate Web3 push notifications and automated email reminders to alert clients 12 hours before the 48-hour freelancer inactivity claim threshold expires.
+3. **Advanced Dashboard Search, Filter & Tagging**:
+   * Add real-time client-side search and filtering across active, under review, completed, and expired escrow agreements.
+4. **Decentralized Dispute Mediation & DAO Arbitration**:
+   * Implement independent decentralized arbitrator pools to resolve contested milestone deliverables on-chain.
+
+---
+
+
 # 📖 Project Overview
 
 StellarFlow V2 is a non-custodial, milestone-based decentralized escrow and reputation platform engineered on Stellar's high-performance Soroban smart contract framework.
@@ -54,6 +88,7 @@ In traditional remote work and Web3 ecosystems, payment processes frequently suf
 The platform builds on the original StellarFlow foundation by introducing multi-signature governance for high-value agreements, automated inactivity-based freelancer protection, downloadable settlement invoicing, and a dual-layer audit architecture spanning both on-chain and off-chain data.
 
 ---
+
 
 # 🆕 What's New in V2?
 
