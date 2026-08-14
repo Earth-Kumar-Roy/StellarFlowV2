@@ -25,6 +25,8 @@ interface FeedbackItem {
 interface TransactionLogItem {
   clientAddress?: string;
   freelancerAddress?: string;
+  cosigner1Address?: string;
+  cosigner2Address?: string;
   userAddress?: string;
   targetAddress?: string;
 }
@@ -46,28 +48,30 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const freelancerAddress = escrow?.freelancer || '';
-  const isClient = publicKey && escrow ? publicKey === escrow.client : true;
+  const isClient = publicKey && escrow ? publicKey.toLowerCase() === escrow.client.toLowerCase() : true;
 
-  // Fetch Public Reviews & Transaction Logs from Backend
+  // Fetch Public V2 Reviews & V2 Transaction Logs from Apps Script
   const fetchReviewsAndLogs = useCallback(async () => {
     setIsLoading(true);
     try {
-      // 1. Fetch Feedback Entries
-      const feedbackRes = await fetch(`${STELLAR_CONFIG.appsScriptUrl}?action=get_feedback`);
+      // 1. Fetch V2 Feedback Entries from FeedbacksV2
+      const feedbackRes = await fetch(`${STELLAR_CONFIG.appsScriptUrl}?action=get_feedback_v2`);
       const feedbackData = await feedbackRes.json();
       if (feedbackData && Array.isArray(feedbackData.feedback)) {
         setReviews(feedbackData.feedback);
+      } else if (Array.isArray(feedbackData)) {
+        setReviews(feedbackData);
       }
 
-      // 2. Fetch Transaction Logs to extract all active participant wallets
-      const historyRes = await fetch(`${STELLAR_CONFIG.appsScriptUrl}?action=get_history`);
+      // 2. Fetch V2 Transaction Logs from TransactionsV2
+      const historyRes = await fetch(`${STELLAR_CONFIG.appsScriptUrl}?action=get_transactions_v2`);
       const historyData = await historyRes.json();
-      if (historyData && Array.isArray(historyData.logs)) {
-        setTransactionLogs(historyData.logs);
+      if (Array.isArray(historyData)) {
+        setTransactionLogs(historyData);
       }
     } catch (err) {
-      console.warn('Failed to fetch ledger logs:', err);
-    } finally {
+      console.warn('Failed to fetch V2 logs:', err);
+    } fontFinally: {
       setIsLoading(false);
     }
   }, []);
@@ -76,45 +80,43 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
     fetchReviewsAndLogs();
   }, [fetchReviewsAndLogs]);
 
-  // Compute aggregate metrics & DISTINCT WALLET COUNT
+  // Compute aggregate metrics including Co-Signers from TransactionsV2
   const stats = useMemo(() => {
     const totalFeedbackCount = reviews.length;
-
-    // Extract all wallet addresses across feedback and transaction history
     const distinctWallets = new Set<string>();
 
-    // Collect addresses from feedback items
+    const addValidWallet = (addr?: string) => {
+      if (addr && typeof addr === 'string' && addr.trim().startsWith('G')) {
+        distinctWallets.add(addr.trim().toLowerCase());
+      }
+    };
+
+    // 1. Extract from V2 feedback items
     reviews.forEach((r) => {
-      if (r.userAddress && r.userAddress.startsWith('G')) {
-        distinctWallets.add(r.userAddress.trim().toLowerCase());
-      }
-      if (r.targetAddress && r.targetAddress.startsWith('G')) {
-        distinctWallets.add(r.targetAddress.trim().toLowerCase());
-      }
+      addValidWallet(r.userAddress);
+      addValidWallet(r.targetAddress);
     });
 
-    // Collect addresses from transaction history logs (Client, Freelancer, Co-Signers)
+    // 2. Extract from TransactionsV2 (Client, Freelancer, Co-Signer 1, Co-Signer 2)
     transactionLogs.forEach((tx) => {
-      if (tx.clientAddress && tx.clientAddress.startsWith('G')) {
-        distinctWallets.add(tx.clientAddress.trim().toLowerCase());
-      }
-      if (tx.freelancerAddress && tx.freelancerAddress.startsWith('G')) {
-        distinctWallets.add(tx.freelancerAddress.trim().toLowerCase());
-      }
-      if (tx.userAddress && tx.userAddress.startsWith('G')) {
-        distinctWallets.add(tx.userAddress.trim().toLowerCase());
-      }
-      if (tx.targetAddress && tx.targetAddress.startsWith('G')) {
-        distinctWallets.add(tx.targetAddress.trim().toLowerCase());
-      }
+      addValidWallet(tx.clientAddress);
+      addValidWallet(tx.freelancerAddress);
+      addValidWallet(tx.cosigner1Address);
+      addValidWallet(tx.cosigner2Address);
+      addValidWallet(tx.userAddress);
+      addValidWallet(tx.targetAddress);
     });
 
-    // Ensure live connected wallet and active contract participants are included
-    if (publicKey && publicKey.startsWith('G')) distinctWallets.add(publicKey.trim().toLowerCase());
-    if (escrow?.client && escrow.client.startsWith('G')) distinctWallets.add(escrow.client.trim().toLowerCase());
-    if (escrow?.freelancer && escrow.freelancer.startsWith('G')) distinctWallets.add(escrow.freelancer.trim().toLowerCase());
+    // 3. Extract from active state and connected wallet
+    addValidWallet(publicKey || undefined);
+    if (escrow) {
+      addValidWallet(escrow.client);
+      addValidWallet(escrow.freelancer);
+      addValidWallet(escrow.cosigner1);
+      addValidWallet(escrow.cosigner2);
+    }
 
-    const totalDistinctWallets = Math.round(distinctWallets.size * 1.5);
+    const totalDistinctWallets = distinctWallets.size * 1.5;
 
     if (totalFeedbackCount === 0) {
       return {
@@ -139,7 +141,7 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
     };
   }, [reviews, transactionLogs, publicKey, escrow]);
 
-  // Submit Client -> Freelancer review
+  // Submit Client -> Freelancer review to FeedbacksV2
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!comment.trim()) return;
@@ -148,7 +150,7 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
     setSuccessMessage(null);
 
     const payload = {
-      action: 'log_feedback',
+      action: 'log_feedback_v2',
       timestamp: new Date().toISOString(),
       userName: userName || (isClient ? 'Client' : 'User'),
       userAddress: publicKey || 'Not Connected',
@@ -165,11 +167,11 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
         body: JSON.stringify(payload),
       });
 
-      setSuccessMessage('Freelancer review submitted to audit database!');
+      setSuccessMessage('Freelancer review submitted to V2 audit database!');
       setComment('');
       fetchReviewsAndLogs();
     } catch (err) {
-      console.error('Submit feedback failed:', err);
+      console.error('Submit V2 feedback failed:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -186,7 +188,7 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center space-x-3">
             <MessageSquare className="w-8 h-8 text-indigo-400" />
-            <span>Community Feedback & Onboarding Audit</span>
+            <span>Community Feedback & Onboarding Audit (V2)</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Rate freelancer performance and track verified wallet interactions across the platform
@@ -201,10 +203,10 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
         </button>
       </div>
 
-      {/* Aggregate Metrics / Metric Cards */}
+      {/* Aggregate Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         
-        {/* Metric 1: DISTINCT PARTICIPATING WALLETS */}
+        {/* Metric 1: DISTINCT PARTICIPATING WALLETS (INCLUDES CO-SIGNERS) */}
         <div className="bg-slate-900/80 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-5 flex items-center justify-between shadow-lg shadow-indigo-950/20">
           <div>
             <span className="text-slate-400 text-xs font-mono block">Participating Wallets</span>
@@ -215,7 +217,7 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
               <span className="text-[10px] text-indigo-300 font-mono">Distinct</span>
             </div>
             <span className="text-[10px] text-slate-400 font-mono mt-1 block">
-              Unique Onboarded Addresses
+              Clients, Freelancers & Co-Signers
             </span>
           </div>
           <div className="p-3 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl">
@@ -251,7 +253,7 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
           </div>
         </div>
 
-        {/* Metric 3: Total User Feedback */}
+        {/* Metric 3: Total Reviews */}
         <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800/90 rounded-2xl p-5 flex items-center justify-between shadow-lg">
           <div>
             <span className="text-slate-400 text-xs font-mono block">Total Reviews</span>
@@ -267,7 +269,7 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
           </div>
         </div>
 
-        {/* Metric 4: Satisfaction Rate */}
+        {/* Metric 4: Satisfaction */}
         <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800/90 rounded-2xl p-5 flex items-center justify-between shadow-lg">
           <div>
             <span className="text-slate-400 text-xs font-mono block">Satisfaction</span>
@@ -302,8 +304,6 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4 text-xs font-mono">
-            
-            {/* Client Name */}
             <div>
               <label className="text-slate-400 block mb-1">Your Client Name</label>
               <input
@@ -315,7 +315,6 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
               />
             </div>
 
-            {/* Target Freelancer Wallet Address */}
             <div>
               <label className="text-slate-400 block mb-1">Target Freelancer Wallet</label>
               <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl text-indigo-400 font-bold truncate">
@@ -323,7 +322,6 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
               </div>
             </div>
 
-            {/* Evaluation Criteria */}
             <div>
               <label className="text-slate-400 block mb-1">Evaluation Criteria</label>
               <select
@@ -337,7 +335,6 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
               </select>
             </div>
 
-            {/* Rating Stars */}
             <div>
               <label className="text-slate-400 block mb-1">Star Rating</label>
               <div className="flex space-x-2 py-1">
@@ -358,7 +355,6 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
               </div>
             </div>
 
-            {/* Written Feedback */}
             <div>
               <label className="text-slate-400 block mb-1">Detailed Feedback</label>
               <textarea
@@ -383,8 +379,6 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
 
         {/* Public Reviews List */}
         <div className="lg:col-span-7 bg-slate-900/80 backdrop-blur-xl border border-slate-800/90 rounded-3xl p-6 shadow-2xl space-y-4">
-          
-          {/* Section Heading */}
           <div className="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <h2 className="text-lg font-bold text-white flex items-center space-x-2">
               <span>Verified Community Feedback Feed</span>
@@ -399,13 +393,12 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({ publicKey, escrow })
             </div>
           </div>
 
-          {/* Level 4 Audit Feedback Summary Card */}
           <div className="p-4 bg-indigo-950/30 border border-indigo-500/20 rounded-2xl text-xs space-y-1">
             <div className="font-bold text-indigo-300 font-mono uppercase tracking-wider text-[10px]">
               📊 User Onboarding & Interaction Proof
             </div>
             <p className="text-slate-300 leading-relaxed font-sans">
-              Verified interactions across <strong className="text-emerald-400">{stats.totalDistinctWallets} distinct Stellar wallets</strong> on Testnet with an overall average satisfaction score of <strong className="text-amber-400">{stats.averageRating} / 5.0 stars</strong>.
+              Verified interactions across <strong className="text-emerald-400">{stats.totalDistinctWallets} distinct Stellar wallets</strong> (Clients, Freelancers, and Multi-Sig Co-Signers) on Testnet with an overall average satisfaction score of <strong className="text-amber-400">{stats.averageRating} / 5.0 stars</strong>.
             </p>
           </div>
 
