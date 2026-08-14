@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { Milestone } from '../types/escrow';
 import { 
   CheckCircle2, 
   Clock, 
   Send, 
-  ShieldCheck, 
   AlertCircle, 
   Coins, 
   XCircle, 
@@ -32,7 +31,7 @@ interface MilestoneTrackerProps {
 const TWO_DAYS_SECONDS = 172800;  // 48 hours required for 10% auto-payout
 const SEVEN_DAYS_SECONDS = 604800; // 7 days required for 40% auto-payout
 
-export const MilestoneTracker: React.FC<MilestoneTrackerProps> = ({
+export const MilestoneTracker = ({
   milestones,
   isClient,
   isFreelancer,
@@ -45,7 +44,7 @@ export const MilestoneTracker: React.FC<MilestoneTrackerProps> = ({
   onApprove,
   onDeny,
   onClaimInactivityPayout,
-}) => {
+}: MilestoneTrackerProps) => {
   const [denialInputId, setDenialInputId] = useState<number | null>(null);
   const [denialReason, setDenialReason] = useState<string>('');
   const [currentTime, setCurrentTime] = useState<number>(Math.floor(Date.now() / 1000));
@@ -283,7 +282,7 @@ export const MilestoneTracker: React.FC<MilestoneTrackerProps> = ({
                     </button>
                   )}
 
-                  {/* Client / Co-Signer Action: Vote to Approve (Disabled if hasUserVoted === true) */}
+                  {/* Client / Co-Signer Action: Vote to Approve */}
                   {(isClient || isCosigner) && !isTrulyCompleted && (
                     <button
                       onClick={() => onApprove(m.id)}
