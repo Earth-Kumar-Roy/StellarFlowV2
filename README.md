@@ -1,243 +1,155 @@
-# ⭐ StellarFlow
-
 <div align="center">
 
-# StellarFlow
+# ⭐ StellarFlow V2
 
-### Non-Custodial Milestone-Based Escrow & Reputation dApp on Stellar Soroban
+### Multi-Sig Milestone Escrow, Inactivity Protection & Reputation dApp on Stellar Soroban
 
 A production-ready decentralized escrow platform built with **React**, **TypeScript**, **Vite**, **Soroban Smart Contracts**, and the **Stellar Network**.
 
-Securely create milestone-based escrow agreements, cryptographically lock funds on-chain, release payouts programmatically, and track every transaction through real-time audit trails and community reputation feeds.
+Securely lock funds in non-custodial smart contracts, enforce 2-of-3 governance for high-value agreements, protect freelancers via automated inactivity claims, export instant settlement PDF invoices, and maintain verifiable on-chain audit trails.
 
 ---
 
 ### 🌐 Live Demo
-
-https://stellar-flow-nine.vercel.app/
+[stellar-flow-v2.vercel.app](https://stellar-flow-v2.vercel.app/)
 
 ### 📂 GitHub Repository
-
-https://github.com/Earth-Kumar-Roy/StellarFlow
+[github.com/Earth-Kumar-Roy/StellarFlowV2](https://github.com/Earth-Kumar-Roy/StellarFlowV2)
 
 ### 🔎 Testnet Contract Explorer
+[stellar.expert — Testnet Contract](https://stellar.expert/explorer/testnet/contract/CCLQR3746SFXSBZT7MX7D7C2BEJ5TFGC5VBSFVJBF75B5MHDK7AH54IO)
 
-https://stellar.expert/explorer/testnet/contract/CBNFHUIF74UPRUQ3JM45ZJCOT6MKW6JUXJ6SICGOPFHH2U6TE2UVURPS
-
-### 🎥 Demo Video
-
-https://drive.google.com/file/d/1O3dk2ECn6y7M0LR0811sXVriUs0NWygM/view?usp=drive_link
+### 🎥 Demo Presentation Video
+[Watch on Google Drive](https://drive.google.com/file/d/1O3dk2ECn6y7M0LR0811sXVriUs0NWygM/view?usp=drive_link)
 
 ---
 
-### 📝 Level 4 Revision Update & Feedback Audit
+### 📝 Live Governance & Community Audit Logs
 
-- **Feedback Page Enhancement**: Fully updated with real-time aggregate analytics, including **Total Feedback Count**, **Participating Wallets Interaction Counter**, and **Average Star Rating**.
-- **In-App Community Feedback Ledger**: https://docs.google.com/spreadsheets/d/14RQ2lbUCWGO36NkopM9LQS3qh0IovK_A1FJGf32xE3U/edit?gid=1379987127#gid=1379987127  
-  *(Verifiable log of direct on-chain and dApp counterparty reviews.)*
-- **Google Form User Onboarding & Feedback Sheet**: https://docs.google.com/spreadsheets/d/14RQ2lbUCWGO36NkopM9LQS3qh0IovK_A1FJGf32xE3U/edit?gid=100772447#gid=100772447  
-  *(Responses collected from community testers via the Google Form feedback banner.)*
+- **In-App Community Feedback Ledger (FeedbacksV2)**
+  [Open Sheet](https://docs.google.com/spreadsheets/d/14RQ2lbUCWGO36NkopM9LQS3qh0IovK_A1FJGf32xE3U/edit?gid=1227724996#gid=1227724996)
+  *(Verifiable log of direct on-chain counterparty reviews and wallet ratings)*
+
+- **User Onboarding & Evaluation Ledger**
+  [Open Sheet](https://docs.google.com/spreadsheets/d/14RQ2lbUCWGO36NkopM9LQS3qh0IovK_A1FJGf32xE3U/edit?gid=449051969#gid=449051969)
+  *(Community feedback collected during live testnet evaluation)*
 
 </div>
 
 ---
 
-# 📖 Project Overview
+## 📖 Project Overview
 
-StellarFlow is a non-custodial, milestone-based escrow platform built on Stellar's Soroban smart contract framework.
+**StellarFlow V2** is a non-custodial, milestone-based escrow platform built on Stellar's Soroban smart contract framework.
 
-The platform enables clients and freelancers to securely create milestone-based agreements where funds are cryptographically locked inside a Soroban smart contract vault. Payouts are released programmatically as milestones are approved, and every transaction is tracked through a real-time, on-chain audit trail integrated with off-chain logging and notification microservices.
-
-The application demonstrates production-ready smart contract architecture, multi-stage payout logic, on-chain reputation indexing, and a responsive Web3 frontend.
+The platform enables clients and freelancers to securely establish milestone agreements where funds are cryptographically locked inside a Soroban smart contract vault. V2 introduces automated **2-of-3 multi-sig governance for high-budget agreements (>5,000 XLM)**, **freelancer inactivity auto-payout protection (10%/40%)**, and **single-page downloadable settlement PDF invoices**, backed by real-time dual audit indexing across Soroban RPC events and Google Apps Script microservices.
 
 ---
 
-# ✨ Features
+## ✨ Core Features
 
-## Escrow Management
+### 🛡️ Non-Custodial Multi-Sig Escrow
+- **Soroban Smart Contract Vaults** — Funds are locked cryptographically in smart contracts on Stellar Testnet.
+- **Granular Milestone Releases** — Programmatic payouts release milestone-by-milestone upon deliverable verification.
+- **2-of-3 Governance Board (>5,000 XLM)** — High-value contracts assign 2 independent governance co-signers, requiring at least 2 approval votes before milestone capital transfers.
 
-- Create milestone-based escrows
-- Cryptographically lock XLM funds
-- Programmatic multi-stage payouts
-- Non-custodial, on-chain fund custody
+### ⏱️ Freelancer Inactivity Protection
+- **Anti-Freeze Capital Security** — Protects freelancers from funds being indefinitely held by unresponsive clients after work submission.
+- **Tier 1 Auto-Claim (48h)** — Unlocks an automated **10% partial payout** directly on-chain if review is inactive for 48 hours.
+- **Tier 2 Auto-Claim (Extended Delay / Deadline)** — Unlocks up to a **40% maximum payout cap** if client inactivity persists.
 
----
+### 📄 Settlement PDF Invoicing Engine
+- **Direct PDF Export (`InvoiceMaker.tsx`)** — Generates single-page settlement invoices.
+- **Deterministic Contract Auditing** — Includes immutable invoice IDs, timestamp verification, stacked wallet addresses, and milestone settlement logs.
+- **Zero-Dependency Document Generation** — Operates fully client-side with clean typography and white-background paper print optimization.
 
-## Refund Protection
+### ⭐ Decentralized Reputation & Feedback
+- **Bi-Directional Evaluation** — Clients rate freelancers on code quality and deadline compliance; freelancers rate clients on approval speed and requirement clarity.
+- **Public FeedbacksV2 Feed** — Real-time counterparty ratings and aggregate analytics for participating wallets.
 
-- Deadline-based refund mechanism
-- Client-initiated withdrawal of unreleased funds
-- Automatic expiration tracking via countdown timer
-
----
-
-## Reputation & Feedback
-
-- Counterparty evaluation system
-- Client rates freelancer on approval speed & requirement clarity
-- Freelancer rates client on code & deliverables, deadline adherence
-- Live community reputation & feedback feed
-- Proper feedback summary displayed on the Feedback Page
+### 🔍 Dual-Layer Audit Trail & Wallet Integration
+- **Freighter Wallet Integration** — Testnet account synchronization with live XLM balance tracking.
+- **TransactionsV2 Logging** — Dual activity tracking via Soroban RPC events and persistent Google Sheets audit trails.
 
 ---
 
-## Wallet
+## 🏛 System Architecture
 
-- Freighter Wallet integration
-- Stellar Testnet support
-- Live XLM balance tracking
-- Secure transaction signing
-
----
-
-## Audit & Activity Logging
-
-- Real-time transaction audit trails
-- Testnet RPC event logs vs. Google Sheets logs
-- Activity log visible even when no wallet is connected
-- High volume of transactions completed across many different wallets, viewable on the testnet contract explorer and Activity Log page
-
----
-
-## Validation & Security
-
-- Wallet authentication
-- Input validation
-- Authorization checks
-- Smart contract access control
-- Transaction error handling
-
----
-
-# 🏛 System Architecture
-
-## On-Chain Payout & Reputation Indexing
+### Soroban V2 Governance & Settlement Flow
 
 ```text
-   ┌───────────────────┐    Soroban Contract    ┌────────────────────────┐
-   │   Client Wallet   │ ──────(Locks XLM)─────►│  Milestone Vault Core  │
-   └─────────┬─────────┘                        └───────────┬────────────┘
-             │                                              │
-             │ (Approves Deliverables)                      │ (Executes Payout)
-             │                                              ▼
-             │                                  ┌────────────────────────┐
-             └─────────────────────────────────►│   Freelancer Wallet    │
-                                                └───────────┬────────────┘
-                                                            │
-    ┌───────────────────────────────────────────────┐       │
-    │           Counterparty Evaluation             │◄──────┘
-    ├───────────────────────┬───────────────────────┤
-    │  Client Rates On:     │ Freelancer Rates On:  │
-    │  • Code & Deliverables│  • Approval Speed     │
-    │  • Deadline Adherence │  • Requirement Clarity│
-    └───────────┬───────────┴───────────┬───────────┘
-                │                       │
-                └───────────┬───────────┘
-                            │
-                            ▼
-              ┌───────────────────────────┐
-              │ Decentralized Reputation  │
-              │  & Audit Indexer Engine   │
-              └─────────────┬─────────────┘
-                            │
-                            ▼
-              ┌───────────────────────────┐
-              │ Live Community Reputation │
-              │     & Feed Dashboard      │
-              └───────────────────────────┘
+   ┌───────────────────┐    Locks Tokens (>5k XLM)   ┌────────────────────────┐
+   │   Client Wallet    │ ──────────────────────────► │  Soroban Escrow Vault  │
+   └─────────┬──────────┘                             └───────────┬────────────┘
+             │                                                    │
+             │ (Work Deliverable Submitted)                       │
+             ▼                                                    │
+   ┌───────────────────┐    Inactivity Protection Timer           │
+   │ Freelancer Wallet  │◄──────────────────────────────────────┤
+   └─────────┬──────────┘    • 48 Hours Inactive  ─► Claim 10%    │
+             │                • Extended Inactive  ─► Claim 40%    │
+             │                                                    │
+             │ (Direct Approval or 2-of-3 Governance Voting)       │
+             ├────────────────────────────────────────────────────┤
+             │                                                    │
+   ┌─────────┴──────────┐    Governance Signatures                │
+   │ Multi-Sig Signers   │ ────────────────────────────────────────┤
+   │ (Co-Signer 1 & 2)   │    (Requires 2-of-3 Vote Threshold)     │
+   └─────────────────────┘                                        │
+                                                                    ▼
+   ┌───────────────────┐    Settlement & PDF Generation   ┌────────────────────────┐
+   │ Client Feedback &  │◄────────────────────────────────│  InvoiceMaker Engine   │
+   │ Reputation Audit   │    (On-Chain Released Balance)   └────────────────────────┘
+   └───────────────────┘
 ```
 
-## Workflow (Between Client and Freelancer)
+---
 
-**01. Create & Lock**
-Client signs `create_escrow` via Freighter. Tokens move from Client to the Soroban Contract Vault.
+## 🔄 Execution Workflow Pipeline
 
-**02. Work Submission**
-Freelancer submits deliverable for a milestone. Work review flag logs to local metadata & Google Sheets.
+**01. CREATE & LOCK**
+Client initializes contract via Freighter. Tokens lock inside the Soroban Vault. Contracts exceeding 5,000 XLM register 2 designated governance co-signers.
 
-**03. Approve & Release**
-Client invokes `approve_milestone`. Contract executes token transfer to Freelancer.
+**02. WORK SUBMISSION**
+Freelancer completes milestone work and submits deliverables. The on-chain milestone state updates to review mode and triggers the 48-hour inactivity timer.
 
-**04. Refund Protection**
-If the deadline passes, Client executes `refund_expired` to withdraw remaining unreleased funds.
+**03. MULTI-SIG VOTE / REVIEW**
+Client or assigned co-signers review work. Contracts >5k XLM record approval votes on-chain until the 2-of-3 threshold is met.
+
+**04. INACTIVITY CLAIM OR APPROVAL RELEASE**
+If the client remains unresponsive for 48h, the freelancer can claim an automated 10% (or up to 40%) payout. Upon standard approval, 100% of the milestone funds transfer.
+
+**05. PDF INVOICE & REPUTATION SETTLEMENT**
+Upon complete agreement payout, counterparties submit on-chain ratings and export verified single-page PDF settlement invoices.
 
 ---
 
-# 🖥 Application Preview
+## ⚙ Technology Stack
 
-https://github.com/Earth-Kumar-Roy/StellarFlow/tree/main/frontend/public/screenshots
-
----
-
-# 📊 Live Feedback & Activity Proof
-
-- A **proper Feedback Summary** is present on the Feedback Page.
-- **Huge numbers of transactions** have been done using many different different wallets — this can be seen on the **testnet contract explorer page** and the **Activity Log page**, even **when no wallet is connected**.
-- Live on-chain contract activity can be verified directly on Stellar Expert:
-  https://stellar.expert/explorer/testnet/contract/CBNFHUIF74UPRUQ3JM45ZJCOT6MKW6JUXJ6SICGOPFHH2U6TE2UVURPS
-
----
-
-# ⚙ Technology Stack
-
-## Frontend
-
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
+| Layer | Technologies |
+|---|---|
+| **Smart Contracts** | Rust, Soroban SDK, WebAssembly (`wasm32-unknown-unknown`) |
+| **Blockchain** | Stellar Testnet, Soroban RPC, Horizon API |
+| **Web3 Client** | Freighter Wallet API, `@stellar/stellar-sdk` |
+| **Frontend UI** | React, TypeScript, Vite, Tailwind CSS, Lucide Icons |
+| **Document Engine** | Client-Side PDF Generation Engine (`InvoiceMaker.tsx`) |
+| **Audit Backend** | Google Apps Script REST API, Google Sheets (`TransactionsV2`, `FeedbacksV2`) |
+| **Deployment** | Vercel (Frontend), Stellar Testnet (Smart Contracts) |
 
 ---
 
-## Smart Contracts
-
-- Rust
-- Soroban SDK
-
----
-
-## Blockchain
-
-- Stellar Testnet
-- Soroban
-- Horizon RPC
-
----
-
-## Web3
-
-- Freighter Wallet API
-- Stellar JavaScript SDK
-
----
-
-## Off-Chain Services
-
-- Google Apps Script
-- Google Sheets (activity & feedback logging)
-
----
-
-## Development
-
-- GitHub Actions
-- Vercel
-- VS Code
-
----
-
-# 📂 Project Structure
+## 📂 Project Structure
 
 ```text
 StellarFlow/
 ├── contracts/
 │   └── escrow/
-│       ├── Cargo.toml               <-- Rust Dependencies & Soroban SDK configuration
+│       ├── Cargo.toml              <-- Rust Dependencies & Soroban SDK configuration
 │       └── src/
-│           ├── lib.rs               <-- Escrow Contract logic & token transfer invocations
-│           ├── types.rs             <-- Data structures (Escrow, Milestone) & custom error enums
-│           ├── storage.rs           <-- Soroban Instance Storage keys & persistence helpers
-│           └── test.rs              <-- Soroban unit tests
+│           ├── lib.rs              <-- Escrow Contract logic, Multi-Sig & Inactivity Payouts
+│           ├── types.rs            <-- Data structures (Escrow, Milestone) & custom error enums
+│           ├── storage.rs          <-- Soroban Instance Storage keys & persistence helpers
+│           └── test.rs             <-- Soroban unit tests
 ├── frontend/
 │   ├── public/
 │   │   └── favicon.svg
@@ -250,20 +162,20 @@ StellarFlow/
 │   │   │   └── api.ts              <-- API fetchers for Google Apps Script sheet logs
 │   │   ├── hooks/
 │   │   │   ├── useWallet.ts        <-- Freighter integration & live XLM balance tracker
-│   │   │   └── useEscrow.ts        <-- Soroban contract calls & auto-logging triggers
+│   │   │   └── useEscrow.ts        <-- Soroban contract calls & V2 auto-logging triggers
 │   │   ├── components/
 │   │   │   ├── Navbar.tsx          <-- Multi-page Navigation, XLM Balance & Role Badges
 │   │   │   ├── Toast.tsx           <-- On-chain transaction status toasts
-│   │   │   ├── MilestoneTracker.tsx<-- Milestone submission & review UI
-│   │   │   ├── CountdownTimer.tsx  <-- Expiration deadline counter
+│   │   │   ├── MilestoneTracker.tsx<-- Milestone submission, multi-sig voting & inactivity UI
 │   │   │   ├── EscrowCard.tsx      <-- Primary contract management interface
+│   │   │   ├── InvoiceMaker.tsx    <-- Single-page PDF settlement invoice generator
 │   │   │   └── FeedbackModal.tsx   <-- On-chain reputation & sheet logger modal
 │   │   ├── pages/
 │   │   │   ├── Dashboard.tsx       <-- Main Operations Dashboard
 │   │   │   ├── CreateEscrowPage.tsx<-- Full-page contract creation form
-│   │   │   ├── HistoryPage.tsx     <-- Audit Logs (Testnet RPC Events vs. Google Sheets)
-│   │   │   ├── FeedbackPage.tsx    <-- Public Counterparty Reputation Feed
-│   │   │   └── DocsPage.tsx        <-- Interactive Technical Documentation (This Page)
+│   │   │   ├── HistoryPage.tsx     <-- Audit Logs (TransactionsV2 & Soroban RPC)
+│   │   │   ├── FeedbackPage.tsx    <-- Public Counterparty Reputation Feed (FeedbacksV2)
+│   │   │   └── DocsPage.tsx        <-- Interactive Technical Documentation
 │   │   ├── App.tsx                 <-- React Router configuration & global layout
 │   │   ├── main.tsx                <-- Entry point
 │   │   └── index.css               <-- Tailwind CSS base directives
@@ -274,106 +186,60 @@ StellarFlow/
 
 ---
 
-# 🚀 Installation
+## 🚀 Quick Start & Installation
 
-Clone the repository.
-
-```bash
-git clone https://github.com/Earth-Kumar-Roy/StellarFlow.git
-```
+### 1. Clone the Repository
 
 ```bash
-cd StellarFlow
+git clone https://github.com/Earth-Kumar-Roy/StellarFlowV2.git
+cd StellarFlowV2
 ```
 
-Install frontend dependencies.
+### 2. Frontend Setup
 
 ```bash
 cd frontend
 npm install
-```
-
-Build and test smart contracts.
-
-```bash
-cargo test --workspace
-cargo build --workspace --target wasm32-unknown-unknown --release
-```
-
-Start the frontend.
-
-```bash
 npm run dev
 ```
 
----
+### 3. Smart Contract Build & Test
 
-# 🔒 Security
-
-- Non-custodial, cryptographically locked fund custody
-- Secure wallet authentication
-- Contract authorization checks
-- Deadline-based refund protection
-- Transaction signing through Freighter
-- Immutable on-chain event logging
-
-Private keys never leave the user's wallet.
+```bash
+cd contracts/escrow
+cargo test
+cargo build --target wasm32-unknown-unknown --release
+```
 
 ---
 
-# 🌍 Deployment
+## 🔒 Security & Verification
 
-**Frontend**
-
-Vercel
-
-**Blockchain**
-
-Stellar Testnet (Soroban)
-
-**Contract Explorer**
-
-https://stellar.expert/explorer/testnet/contract/CBNFHUIF74UPRUQ3JM45ZJCOT6MKW6JUXJ6SICGOPFHH2U6TE2UVURPS
+- **Non-Custodial Architecture** — Private keys and wallet authentication remain strictly inside the user's Freighter extension.
+- **Contract Authorization Checks** — Only authorized counterparties or designated multi-sig co-signers can execute voting or release functions.
+- **Deadline Refund Protection** — Clients retain `refund_expired` rights to retrieve unreleased capital if agreements lapse past deadlines.
+- **Contract Verification** — Verify transactions live on [Stellar Expert Explorer](https://stellar.expert/explorer/testnet/contract/CCLQR3746SFXSBZT7MX7D7C2BEJ5TFGC5VBSFVJBF75B5MHDK7AH54IO).
 
 ---
 
-# 🔮 Future Improvements
-
-- Multi-signature milestone approval
-- Multiple/independent dispute mediators
-- DAO-based arbitration
-- IPFS agreement storage
-- Email notifications
-- Mainnet deployment
-
----
-
-# 👨‍💻 Developer
+## 👨‍💻 Developer
 
 **Earth Kumar Roy**
-
-GitHub
-
-https://github.com/Earth-Kumar-Roy
+GitHub: [@Earth-Kumar-Roy](https://github.com/Earth-Kumar-Roy)
+Repository: [StellarFlowV2](https://github.com/Earth-Kumar-Roy/StellarFlowV2)
 
 ---
 
-# 🙏 Acknowledgements
+## 🙏 Acknowledgements
 
-- Stellar Development Foundation
-- Soroban SDK
-- Stellar JavaScript SDK
-- Freighter Wallet
-- React
-- Vite
-- Vercel
+- Stellar Development Foundation (SDF) & Soroban Framework
+- Freighter Wallet Team
+- Vercel Hosting Platform
 
 ---
 
 <div align="center">
 
-### ⭐ Thank you for visiting StellarFlow ⭐
-
-Built with ❤️ by EKR using React, TypeScript, Soroban, and the Stellar Network.
+**⭐ StellarFlow V2 — Trustless Work Escrow on Stellar Soroban ⭐**
 
 </div>
