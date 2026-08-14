@@ -9,7 +9,8 @@ import {
   Coins, 
   Clock, 
   ShieldCheck, 
-  AlertCircle 
+  AlertCircle,
+  Users
 } from 'lucide-react';
 
 interface CreateEscrowModalProps {
@@ -22,6 +23,8 @@ interface CreateEscrowModalProps {
     freelancer: string,
     freelancerName: string,
     freelancerEmail: string,
+    cosigner1: string,
+    cosigner2: string,
     token: string,
     totalAmount: string,
     deadline: number,
@@ -40,6 +43,8 @@ export const CreateEscrowModal: React.FC<CreateEscrowModalProps> = ({
   const [freelancer, setFreelancer] = useState('');
   const [freelancerName, setFreelancerName] = useState('');
   const [freelancerEmail, setFreelancerEmail] = useState('');
+  const [cosigner1, setCosigner1] = useState('');
+  const [cosigner2, setCosigner2] = useState('');
   const [token, setToken] = useState(STELLAR_CONFIG.nativeTokenAddress);
   const [totalAmount, setTotalAmount] = useState('');
   const [days, setDays] = useState('7');
@@ -81,23 +86,37 @@ export const CreateEscrowModal: React.FC<CreateEscrowModalProps> = ({
   const totalVal = parseFloat(totalAmount) || 0;
   const isAmountMismatch = totalVal > 0 && milestoneSum !== totalVal;
 
+  // Multi-Sig Threshold Rule: Amounts > 5,000 XLM mandate co-signers
+  const isMultiSigRequired = totalVal > 5000;
+  const isCosignerMissing = isMultiSigRequired && (!cosigner1.trim() || !cosigner2.trim());
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (isAmountMismatch) {
       alert(
-        `Milestone sum (${milestoneSum}) must equal Total Escrow Amount (${totalVal}).`
+        `Milestone sum (${milestoneSum} XLM) must equal Total Escrow Amount (${totalVal} XLM).`
       );
       return;
     }
+
+    if (isCosignerMissing) {
+      alert('Escrows above 5,000 XLM mandate two distinct co-signer wallet addresses for multi-sig governance.');
+      return;
+    }
+
     const deadlineTimestamp = Math.floor(
       Date.now() / 1000 + parseInt(days, 10) * 86400
     );
+
     onSubmit(
       clientName || 'Client',
       clientEmail,
       freelancer,
       freelancerName || 'Freelancer',
       freelancerEmail,
+      cosigner1.trim(),
+      cosigner2.trim(),
       token,
       totalAmount,
       deadlineTimestamp,
@@ -116,13 +135,13 @@ export const CreateEscrowModal: React.FC<CreateEscrowModalProps> = ({
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-xl font-black text-white">Initialize Smart Escrow</h3>
-              <p className="text-xs text-slate-400">Deploy non-custodial milestone vault</p>
+              <h3 className="text-xl font-black text-white">Initialize Smart Escrow (V2)</h3>
+              <p className="text-xs text-slate-400">Deploy non-custodial 2-of-3 multi-sig milestone vault</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-800 rounded-xl transition"
+            className="p-2 text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-800 rounded-xl transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -199,6 +218,45 @@ export const CreateEscrowModal: React.FC<CreateEscrowModalProps> = ({
             </div>
           </div>
 
+          {/* Governance Co-Signers Section */}
+          <div className={`p-4 rounded-2xl border space-y-3 transition-all ${
+            isMultiSigRequired ? 'bg-indigo-950/40 border-indigo-500/50' : 'bg-slate-950/50 border-slate-800/80'
+          }`}>
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-bold uppercase text-violet-400 flex items-center space-x-1.5 font-mono">
+                <Users className="w-3.5 h-3.5" />
+                <span>Multi-Sig Co-Signers</span>
+              </span>
+              {isMultiSigRequired && (
+                <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono font-bold">
+                  Required (&gt; 5k XLM)
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <input
+                  type="text"
+                  required={isMultiSigRequired}
+                  placeholder={`Co-Signer 1 Address ${isMultiSigRequired ? '*' : '(Optional)'}`}
+                  value={cosigner1}
+                  onChange={(e) => setCosigner1(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-white text-xs focus:outline-none focus:border-violet-500 font-mono"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  required={isMultiSigRequired}
+                  placeholder={`Co-Signer 2 Address ${isMultiSigRequired ? '*' : '(Optional)'}`}
+                  value={cosigner2}
+                  onChange={(e) => setCosigner2(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-white text-xs focus:outline-none focus:border-violet-500 font-mono"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Token Contract Address */}
           <div>
             <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
@@ -253,7 +311,7 @@ export const CreateEscrowModal: React.FC<CreateEscrowModalProps> = ({
               <button
                 type="button"
                 onClick={handleAddMilestone}
-                className="flex items-center space-x-1 text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+                className="flex items-center space-x-1 text-xs text-indigo-400 hover:text-indigo-300 font-medium cursor-pointer"
               >
                 <PlusCircle className="w-3.5 h-3.5" />
                 <span>Add Milestone</span>
@@ -286,7 +344,7 @@ export const CreateEscrowModal: React.FC<CreateEscrowModalProps> = ({
                   <button
                     type="button"
                     onClick={() => handleRemoveMilestone(idx)}
-                    className="p-2 text-slate-500 hover:text-rose-400 transition"
+                    className="p-2 text-slate-500 hover:text-rose-400 transition cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -296,9 +354,9 @@ export const CreateEscrowModal: React.FC<CreateEscrowModalProps> = ({
 
             {isAmountMismatch && (
               <p className="text-xs text-amber-400 flex items-center space-x-1 mt-1 font-mono">
-                <AlertCircle className="w-3.5 h-3.5" />
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>
-                  Milestone total ({milestoneSum}) does not equal Total Amount ({totalVal}).
+                  Milestone total ({milestoneSum} XLM) does not equal Total Amount ({totalVal} XLM).
                 </span>
               </p>
             )}
@@ -309,14 +367,14 @@ export const CreateEscrowModal: React.FC<CreateEscrowModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-5 py-2.5 rounded-xl transition"
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-5 py-2.5 rounded-xl transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || isAmountMismatch}
-              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/25"
+              disabled={isSubmitting || isAmountMismatch || isCosignerMissing}
+              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/25 cursor-pointer"
             >
               {isSubmitting ? 'Deploying to Soroban...' : 'Initialize Escrow'}
             </button>
