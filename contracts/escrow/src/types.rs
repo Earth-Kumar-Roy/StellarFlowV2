@@ -14,6 +14,13 @@ pub enum EscrowError {
     InvalidAmount = 8,
     ContractExpired = 9,
     MilestoneSumMismatch = 10,
+    WorkNotSubmitted = 11,
+    AlreadyVoted = 12,
+    InsufficientVotes = 13,
+    InactivityWindowNotReached = 14,
+    MilestoneDenied = 15,
+    CosignerRequired = 16,
+    NothingToRelease = 17,
 }
 
 #[contracttype]
@@ -31,6 +38,12 @@ pub struct Milestone {
     pub description: String,
     pub amount: i128,
     pub is_completed: bool,
+    pub is_submitted: bool,
+    pub submitted_at: u64,
+    pub is_denied: bool,
+    pub denial_reason: String,
+    pub auto_released_amount: i128,
+    pub votes: Vec<Address>,
 }
 
 #[contracttype]
@@ -38,6 +51,8 @@ pub struct Milestone {
 pub struct Escrow {
     pub client: Address,
     pub freelancer: Address,
+    pub cosigner_1: Option<Address>,
+    pub cosigner_2: Option<Address>,
     pub token: Address,
     pub total_amount: i128,
     pub released_amount: i128,
