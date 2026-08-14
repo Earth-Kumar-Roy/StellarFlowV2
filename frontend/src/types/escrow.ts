@@ -11,7 +11,13 @@ export interface Milestone {
   description: string;
   amount: string;
   isCompleted: boolean;
-  isInReview?: boolean; // Milestone work submission status by Freelancer
+  isSubmitted?: boolean;
+  isInReview?: boolean; // Legacy/UI work submission status
+  submittedAt?: number; // Unix timestamp when work was submitted on-chain
+  isDenied?: boolean;
+  denialReason?: string;
+  autoReleasedAmount?: string; // Stroops/Amount auto-released due to client inactivity
+  votes?: string[]; // Addresses of approvers who voted for multi-sig (>5,000 threshold)
 }
 
 export interface Escrow {
@@ -21,7 +27,10 @@ export interface Escrow {
   freelancer: string;
   freelancerName?: string;
   freelancerEmail?: string;
+  cosigner1?: string | null;
+  cosigner2?: string | null;
   token: string;
+  currency?: string; // Token symbol (e.g., XLM, USDC, EURC)
   totalAmount: string;
   releasedAmount: string;
   deadline: number; // Unix timestamp in seconds
@@ -40,18 +49,30 @@ export interface UserFeedback {
 
 export interface DbTransaction {
   timestamp: string;
-  eventType: 'ESCROW_CREATED' | 'WORK_SUBMITTED' | 'MILESTONE_RELEASED' | 'REFUNDED' | string;
+  eventType: 
+    | 'ESCROW_CREATED' 
+    | 'WORK_SUBMITTED' 
+    | 'MILESTONE_RELEASED' 
+    | 'MILESTONE_DENIED'
+    | 'PARTIAL_PAYOUT_RELEASED'
+    | 'REFUNDED' 
+    | string;
   clientName: string;
   clientAddress: string;
   clientEmail?: string;
   freelancerName: string;
   freelancerAddress: string;
   freelancerEmail?: string;
+  cosigner1Address?: string;
+  cosigner2Address?: string;
   totalAmount: string;
+  currency?: string;
   milestoneId?: number | string;
   milestoneDescription?: string;
   milestoneAmount?: string;
   txHash: string;
+  denialReason?: string;
+  coSignInfo?: string;
 }
 
 export interface TestnetEvent {
