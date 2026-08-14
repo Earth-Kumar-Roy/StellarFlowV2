@@ -65,7 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="bg-gradient-to-r from-indigo-900 via-indigo-700 to-violet-900 text-white text-xs font-medium py-2 px-4 text-center border-b border-indigo-500/30 flex items-center justify-center space-x-2">
         <span>Share your valuable feedback (less than 1 min) to help us elevate StellarFlow.</span>
         <a 
-          href="https://docs.google.com/forms/d/e/1FAIpQLSfRaBsIDi4WFNqBZjSm0DU6lm5WyUKpZQcxfVbLlnvjG_79ow/viewform?usp=dialog" 
+          href="https://docs.google.com/forms/d/e/1FAIpQLSdNgxtQ-RwlbzeZW-v1WvDm9xtM3CBmQ0ub1CARjXllzQ1Gfg/viewform" 
           target="_blank" 
           rel="noopener noreferrer" 
           className="inline-flex items-center space-x-1 underline font-bold text-amber-300 hover:text-amber-200 transition ml-1"
