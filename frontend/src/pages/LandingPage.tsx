@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
-  const demoUrl = 'https://drive.google.com/file/d/1O3dk2ECn6y7M0LR0811sXVriUs0NWygM/view?usp=drive_link';
+  const demoUrl = 'https://drive.google.com/file/d/1Pcxuvv1ndbkt7Kd9M9xjwV5DWXD8ZEFE/view?usp=drive_link';
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white space-y-20 pb-16">
