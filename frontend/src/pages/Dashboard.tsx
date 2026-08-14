@@ -6,9 +6,6 @@ import {
   PlusCircle, 
   RefreshCw, 
   Layers, 
-  ShieldCheck, 
-  UserCheck, 
-  Eye, 
   MessageSquare,
   ArrowRight
 } from 'lucide-react';
@@ -22,6 +19,8 @@ interface DashboardProps {
   onFetchEscrow: (activePublicKey?: string | null) => void;
   onSubmitWorkForReview: (id: number, targetEscrow?: Escrow) => void;
   onApproveMilestone: (id: number, targetEscrow?: Escrow) => void;
+  onDenyMilestone?: (id: number, reason: string, targetEscrow?: Escrow) => void;
+  onClaimInactivityPayout?: (id: number, targetEscrow?: Escrow) => void;
   onRefundExpired: (targetEscrow?: Escrow) => void;
 }
 
@@ -34,9 +33,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onFetchEscrow,
   onSubmitWorkForReview,
   onApproveMilestone,
+  onDenyMilestone,
+  onClaimInactivityPayout,
   onRefundExpired,
 }) => {
-  // Merge live on-chain escrow with locally saved user escrows, filtered by participant wallet
+  // Merge live on-chain escrow with locally saved user escrows, filtered by participant/co-signer wallet
   const displayEscrows: Escrow[] = useMemo(() => {
     if (!publicKey) return [];
 
@@ -46,7 +47,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const isUserParticipant = (e: Escrow) => {
       const isClient = e.client?.toLowerCase() === activeKey;
       const isFreelancer = e.freelancer?.toLowerCase() === activeKey;
-      return isClient || isFreelancer;
+      const isCosigner1 = e.cosigner1?.toLowerCase() === activeKey;
+      const isCosigner2 = e.cosigner2?.toLowerCase() === activeKey;
+      return isClient || isFreelancer || isCosigner1 || isCosigner2;
     };
 
     // 1. Process local history for connected wallet
@@ -57,7 +60,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       }
     });
 
-    // 2. Include live RPC contract ONLY if connected wallet is a participant
+    // 2. Include live RPC contract ONLY if connected wallet is a participant or co-signer
     if (escrow?.client && escrow?.freelancer && isUserParticipant(escrow)) {
       const liveKey = `${escrow.client.toLowerCase()}_${escrow.freelancer.toLowerCase()}_${escrow.deadline}`;
       combinedMap.set(liveKey, escrow);
@@ -66,16 +69,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return Array.from(combinedMap.values());
   }, [escrow, userEscrows, publicKey]);
 
-  const activeKey = publicKey ? publicKey.trim().toLowerCase() : '';
-
-  const isClient = Boolean(
-    activeKey && displayEscrows.some((e) => e.client?.toLowerCase() === activeKey)
-  );
-
-  const isFreelancer = Boolean(
-    activeKey && displayEscrows.some((e) => e.freelancer?.toLowerCase() === activeKey)
-  );
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
       
@@ -83,14 +76,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 p-6 rounded-3xl">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Escrow Operations Dashboard
+            Escrow Operations Dashboard (V2)
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Manage Soroban non-custodial milestone vaults & live execution states
+            Manage Soroban 2-of-3 multi-sig milestone vaults, work denials & inactivity payouts
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => onFetchEscrow(publicKey)}
             disabled={isFetching}
@@ -119,36 +112,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* Role Context Notification Banner */}
-      {publicKey && displayEscrows.length > 0 && (
-        <div className="p-4 rounded-2xl border backdrop-blur-md transition-all bg-slate-900/40 border-slate-800/80 space-y-2">
-          {isClient && (
-            <div className="flex items-center space-x-3 text-indigo-300 bg-indigo-950/40 border-indigo-500/30 p-3.5 rounded-xl border">
-              <ShieldCheck className="w-5 h-5 text-indigo-400 shrink-0" />
-              <div className="text-xs">
-                <strong className="text-indigo-200">Logged in as Client:</strong> You have authority to review submitted milestones and authorize payout releases to the freelancer.
-              </div>
-            </div>
-          )}
-          {isFreelancer && (
-            <div className="flex items-center space-x-3 text-emerald-300 bg-emerald-950/40 border-emerald-500/30 p-3.5 rounded-xl border">
-              <UserCheck className="w-5 h-5 text-emerald-400 shrink-0" />
-              <div className="text-xs">
-                <strong className="text-emerald-200">Logged in as Freelancer:</strong> Submit work for review on active milestones to alert the client for release.
-              </div>
-            </div>
-          )}
-          {!isClient && !isFreelancer && (
-            <div className="flex items-center space-x-3 text-slate-300 bg-slate-900/60 border-slate-700/60 p-3.5 rounded-xl border">
-              <Eye className="w-5 h-5 text-slate-400 shrink-0" />
-              <div className="text-xs">
-                <strong className="text-slate-200">Observer Mode:</strong> Your wallet is not a primary participant in these contract agreements.
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Main Content Area */}
       {isFetching && displayEscrows.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 bg-slate-900/40 border border-slate-800/80 rounded-3xl">
@@ -165,6 +128,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               isSubmitting={isSubmitting}
               onSubmitWorkForReview={(id: number) => onSubmitWorkForReview(id, escrowItem)}
               onApproveMilestone={(id: number) => onApproveMilestone(id, escrowItem)}
+              onDenyMilestone={(id: number, reason: string) => onDenyMilestone?.(id, reason, escrowItem)}
+              onClaimInactivityPayout={(id: number) => onClaimInactivityPayout?.(id, escrowItem)}
               onRefundExpired={() => onRefundExpired(escrowItem)}
             />
           ))}
