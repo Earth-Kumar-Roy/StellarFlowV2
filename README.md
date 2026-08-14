@@ -30,7 +30,7 @@ https://drive.google.com/file/d/1O3dk2ECn6y7M0LR0811sXVriUs0NWygM/view?usp=drive
 
 ### 📽 PPT link
 
-https://docs.google.com/presentation/d/11tMTq6zIa_f_SxZivAOf1RddluLUziNA/edit?usp=sharing&ouid=111902574578733458808&rtpof=true&sd=true
+https://docs.google.com/presentation/d/1WEC3J_Z2Bjo8hUsZjZebJixIetrs9Nz2/edit?usp=drive_link&ouid=111902574578733458808&rtpof=true&sd=true
 
 ---
 
