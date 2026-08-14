@@ -26,7 +26,7 @@ https://stellar.expert/explorer/testnet/contract/CCLQR3746SFXSBZT7MX7D7C2BEJ5TFG
 
 ### 🎥 Demo Video
 
-https://drive.google.com/file/d/1O3dk2ECn6y7M0LR0811sXVriUs0NWygM/view?usp=drive_link
+https://drive.google.com/file/d/1Pcxuvv1ndbkt7Kd9M9xjwV5DWXD8ZEFE/view?usp=drive_link
 
 ### 📽 PPT link
 
