@@ -40,8 +40,6 @@ https://docs.google.com/presentation/d/1WEC3J_Z2Bjo8hUsZjZebJixIetrs9Nz2/edit?us
 
 ### 📝 Community Feedback & Evaluation Ledgers
 
-- **Community Feedback Ledger**: https://docs.google.com/spreadsheets/d/14RQ2lbUCWGO36NkopM9LQS3qh0IovK_A1FJGf32xE3U/edit?gid=1227724996#gid=1227724996  
-  *(Verifiable log of direct on-chain and dApp counterparty reviews.)*
 - **User Onboarding & Evaluation Sheet**: https://docs.google.com/spreadsheets/d/14RQ2lbUCWGO36NkopM9LQS3qh0IovK_A1FJGf32xE3U/edit?gid=449051969#gid=449051969  
   *(Responses collected from community testers via the onboarding & evaluation form.)*
 
