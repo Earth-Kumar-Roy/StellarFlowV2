@@ -28,6 +28,10 @@ https://stellar.expert/explorer/testnet/contract/CCLQR3746SFXSBZT7MX7D7C2BEJ5TFG
 
 https://drive.google.com/file/d/1Pcxuvv1ndbkt7Kd9M9xjwV5DWXD8ZEFE/view?usp=drive_link
 
+### 📺 Application Screenshots
+
+https://github.com/Earth-Kumar-Roy/StellarFlowV2/tree/main/frontend/public/screenshots
+
 ### 📽 PPT link
 
 https://docs.google.com/presentation/d/1WEC3J_Z2Bjo8hUsZjZebJixIetrs9Nz2/edit?usp=drive_link&ouid=111902574578733458808&rtpof=true&sd=true
