@@ -65,6 +65,16 @@ Based on comprehensive evaluation and feedback collected from 50+ testnet users 
    * **Implemented Solution**: Added dynamic voting indicators (`voteCount/2`), disabled double-voting states per active wallet address, and integrated explicit governance badge tags across milestones.
    * **Git Commit**: [`f61f8da2d5388e14e876da11508a21a94ddb58a5`](https://github.com/Earth-Kumar-Roy/StellarFlowV2/commit/f61f8da2d5388e14e876da11508a21a94ddb58a5) — *`feat(ui): build interactive milestone review cards with multi-sig governance voting`*
 
+3. **Advanced Dashboard Search, Status Filter & Sorting Toolbar (`EscrowFilterBar.tsx` & `Dashboard.tsx`)**
+   * **User Feedback Addressed**: Testers managing multiple concurrent contracts requested live filtering and keyword search across their active, reviewed, completed, and expired vaults.
+   * **Implemented Solution**: Added a real-time search toolbar supporting instant keyword matching (counterparty names, addresses, descriptions), 1-click status tabs (`All`, `Active`, `In Review`, `Settled`, `Expired`), dynamic sorting (`Newest`, `Oldest`, `Highest Budget`, `Closest Deadline`), and live agreement counters.
+   * **Git Commit**: [`8d37182f9db498167d93660dded2706848622624`](https://github.com/Earth-Kumar-Roy/StellarFlowV2/commit/8d37182f9db498167d93660dded2706848622624) — *`feat(dashboard): add live escrow search, multi-status filters and sorting controls`*
+
+4. **Real-Time Settlement Progress Radar & Multi-Currency Valuation Toggle (`Navbar.tsx` & `EscrowCard.tsx`)**
+   * **User Feedback Addressed**: Users wanted traditional currency estimation alongside crypto amounts and an instant visual health/completion overview for each agreement.
+   * **Implemented Solution**: Integrated a global fiat conversion switcher (`Native Token`, `USD $`, `EUR €`, `INR ₹`) synced across all cards, alongside a visual settlement stepper gauge displaying disbursed liquidity percentage, per-milestone progress badges, and 1-click clipboard audit reports.
+   * **Git Commit**: [`8d37182f9db498167d93660dded2706848622624`](https://github.com/Earth-Kumar-Roy/StellarFlowV2/commit/8d37182f9db498167d93660dded2706848622624) — *`feat(escrow): add settlement progress radar and multi-currency valuation toggle`*
+
 ---
 
 ### 🔮 Next-Phase Evolution Roadmap (Driven by User Feedback)
@@ -167,28 +177,28 @@ The platform builds on the original StellarFlow foundation by introducing multi-
 
 ```text
    ┌───────────────────┐   Locks Tokens (>5k XLM)   ┌────────────────────────┐
-   │   Client Wallet    │ ─────────────────────────►│  Soroban Escrow Vault  │
-   └─────────┬──────────┘                            └───────────┬────────────┘
-             │                                                   │
-             │ (Work Deliverable Submitted)                      │
-             ▼                                                   │
+   │   Client Wallet   │ ─────────────────────────►│  Soroban Escrow Vault  │
+   └─────────┬─────────┘                            └───────────┬────────────┘
+             │                                                  │
+             │ (Work Deliverable Submitted)                     │
+             ▼                                                  │
    ┌───────────────────┐    Inactivity Protection Timer          │
-   │ Freelancer Wallet  │◄──────────────────────────────────────┤
-   └─────────┬──────────┘    • 48 Hours Inactive  ─► Claim 10%   │
-             │                • Extended Inactive  ─► Claim 40%  │
-             │                                                   │
+   │ Freelancer Wallet │◄──────────────────────────────────────┤
+   └─────────┬─────────┘    • 48 Hours Inactive  ─► Claim 10%   │
+             │              • Extended Inactive  ─► Claim 40%   │
+             │                                                  │
              │ (Direct Approval or 2-of-3 Governance Voting)     │
              ├───────────────────────────────────────────────────┤
-             │                                                   │
-   ┌─────────┴──────────┐   Governance Signatures                │
+             │                                                  │
+   ┌─────────┴──────────┐   Governance Signatures               │
    │  Multi-Sig Signers  │ ────────────────────────────────────►│
    │ (Co-Signer 1 & 2)   │   (Requires 2-of-3 Vote Threshold)     │
-   └─────────────────────┘                                       │
-                                                                  ▼
+   └────────────────────┘                                       │
+                                                                ▼
    ┌───────────────────┐   Settlement & PDF Generation  ┌────────────────────────┐
    │ Client Feedback &  │◄────────────────────────────── │   InvoiceMaker Engine  │
    │ Reputation Audit   │   (On-Chain Released Balance)  └────────────────────────┘
-   └─────────────────────┘
+   └───────────────────┘
 ```
 
 ## Workflow (Between Client and Freelancer)
@@ -209,7 +219,7 @@ If the client remains unresponsive for 48 hours, the freelancer can claim an aut
 Once all milestones are completed and released, counterparties submit on-chain ratings to FeedbacksV2 and export official single-page PDF settlement invoices via InvoiceMaker.tsx.
 
 **06. Refund Protection (If Expired)**
-If the project deadline passes and deliverables are incomplete or unapproved, the client executes `refund_expired` to withdraw all remaining locked funds.
+If the project deadline passes and deliverables are incomplete or unapproved, the client executes refund_expired to withdraw all remaining locked funds.
 
 ---
 
@@ -217,60 +227,42 @@ If the project deadline passes and deliverables are incomplete or unapproved, th
 
 - Comprehensive feedback analytics — the live Feedback Page aggregates total feedback counts, distinct participating wallet counters, and counterparty rating distributions.
 - High-volume multi-wallet testing — extensively verified across diverse testnet wallets, with contract state transitions viewable on both the in-app Activity Log and Stellar Expert.
-- Live on-chain contract activity can be verified directly on Stellar Expert:
-  https://stellar.expert/explorer/testnet/contract/CCLQR3746SFXSBZT7MX7D7C2BEJ5TFGC5VBSFVJBF75B5MHDK7AH54IO
+
+Live on-chain contract activity can be verified directly on Stellar Expert:
+https://stellar.expert/explorer/testnet/contract/CCLQR3746SFXSBZT7MX7D7C2BEJ5TFGC5VBSFVJBF75B5MHDK7AH54IO
 
 ---
 
 # ⚙ Technology Stack
 
-## Frontend
-
+**Frontend**
 - React 18
 - TypeScript
 - Vite
 - Tailwind CSS
 - Lucide Icons
 
----
-
-## Smart Contracts
-
+**Smart Contracts**
 - Rust
 - Soroban SDK
 
----
-
-## Blockchain
-
+**Blockchain**
 - Stellar Testnet
 - Soroban
 - Horizon RPC
 
----
-
-## Web3
-
+**Web3**
 - Freighter Wallet API
-- `@stellar/stellar-sdk`
+- @stellar/stellar-sdk
 
----
+**Document Generation**
+- Native DOM Iframe Engine (InvoiceMaker.tsx) — zero-network, single-page PDF invoice rendering
 
-## Document Generation
-
-- Native DOM Iframe Engine (`InvoiceMaker.tsx`) — zero-network, single-page PDF invoice rendering
-
----
-
-## Off-Chain Services
-
+**Off-Chain Services**
 - Google Apps Script REST API
-- Google Sheets (`TransactionsV2`, `FeedbacksV2` multi-sheet indexing)
+- Google Sheets (TransactionsV2, FeedbacksV2 multi-sheet indexing)
 
----
-
-## Development
-
+**Development**
 - GitHub Actions
 - Vercel
 - VS Code
@@ -279,46 +271,47 @@ If the project deadline passes and deliverables are incomplete or unapproved, th
 
 # 📂 Project Structure
 
-```text
+```plaintext
 StellarFlow/
 ├── contracts/
 │   └── escrow/
-│       ├── Cargo.toml              <-- Rust dependencies & Soroban SDK configuration
+│       ├── Cargo.toml               <-- Rust dependencies & Soroban SDK configuration
 │       └── src/
-│           ├── lib.rs              <-- Escrow contract logic, multi-sig & inactivity payouts
-│           ├── types.rs            <-- Data structures (Escrow, Milestone) & custom error enums
-│           ├── storage.rs          <-- Soroban instance storage keys & persistence helpers
-│           └── test.rs             <-- Soroban automated unit test suite
+│           ├── lib.rs               <-- Escrow contract logic, multi-sig & inactivity payouts
+│           ├── types.rs             <-- Data structures (Escrow, Milestone) & custom error enums
+│           ├── storage.rs           <-- Soroban instance storage keys & persistence helpers
+│           └── test.rs              <-- Soroban automated unit test suite
 ├── frontend/
 │   ├── public/
-│   │   └── favicon.svg             <-- Web3 brand assets
+│   │   └── favicon.svg              <-- Web3 brand assets
 │   ├── src/
 │   │   ├── config/
-│   │   │   └── stellar.ts          <-- RPC URL, contract ID & Apps Script endpoints
+│   │   │   └── stellar.ts           <-- RPC URL, contract ID & Apps Script endpoints
 │   │   ├── types/
-│   │   │   └── escrow.ts           <-- TypeScript interfaces for Escrow, Milestones & Audit Logs
+│   │   │   └── escrow.ts            <-- TypeScript interfaces for Escrow, Milestones & Audit Logs
 │   │   ├── utils/
-│   │   │   └── api.ts              <-- REST API fetchers for Google Apps Script sheet logs
+│   │   │   └── api.ts               <-- REST API fetchers for Google Apps Script sheet logs
 │   │   ├── hooks/
-│   │   │   ├── useWallet.ts        <-- Freighter integration & live XLM balance tracker
-│   │   │   └── useEscrow.ts        <-- Soroban contract calls & V2 auto-logging triggers
+│   │   │   ├── useWallet.ts         <-- Freighter integration & live XLM balance tracker
+│   │   │   └── useEscrow.ts         <-- Soroban contract calls & V2 auto-logging triggers
 │   │   ├── components/
-│   │   │   ├── Navbar.tsx          <-- Multi-page navigation, XLM balance & role badges
-│   │   │   ├── Toast.tsx           <-- On-chain transaction status notifications
-│   │   │   ├── MilestoneTracker.tsx<-- Milestone submission, multi-sig voting & inactivity UI
-│   │   │   ├── EscrowCard.tsx      <-- Primary contract management interface
-│   │   │   ├── InvoiceMaker.tsx    <-- Single-page PDF settlement invoice generator
-│   │   │   └── FeedbackModal.tsx   <-- On-chain reputation & sheet logger modal
+│   │   │   ├── Navbar.tsx           <-- Multi-page navigation, currency switcher & wallet status
+│   │   │   ├── EscrowFilterBar.tsx  <-- Live search input, status filter pills & sort controls
+│   │   │   ├── Toast.tsx            <-- On-chain transaction status notifications
+│   │   │   ├── MilestoneTracker.tsx <-- Milestone submission, multi-sig voting & inactivity UI
+│   │   │   ├── EscrowCard.tsx       <-- Primary contract vault card with settlement progress radar
+│   │   │   ├── InvoiceMaker.tsx     <-- Single-page PDF settlement invoice generator
+│   │   │   └── FeedbackModal.tsx    <-- On-chain reputation & sheet logger modal
 │   │   ├── pages/
-│   │   │   ├── Dashboard.tsx       <-- Main operations dashboard
-│   │   │   ├── CreateEscrowPage.tsx<-- Full-page contract creation form with co-signers
-│   │   │   ├── HistoryPage.tsx     <-- Audit logs (TransactionsV2 & Soroban RPC)
-│   │   │   ├── FeedbackPage.tsx    <-- Public counterparty reputation feed (FeedbacksV2)
-│   │   │   ├── DocsPage.tsx        <-- Interactive technical documentation
-│   │   │   └── LandingPage.tsx     <-- Production landing page & feature overview
-│   │   ├── App.tsx                 <-- React Router configuration & global layout
-│   │   ├── main.tsx                <-- Application bootstrap entry point
-│   │   └── index.css               <-- Tailwind CSS base directives & print styling
+│   │   │   ├── Dashboard.tsx        <-- Operations dashboard with search & filter integration
+│   │   │   ├── CreateEscrowPage.tsx <-- Full-page contract creation form with co-signers
+│   │   │   ├── HistoryPage.tsx      <-- Audit logs (TransactionsV2 & Soroban RPC)
+│   │   │   ├── FeedbackPage.tsx     <-- Public counterparty reputation feed (FeedbacksV2)
+│   │   │   ├── DocsPage.tsx         <-- Interactive technical documentation
+│   │   │   └── LandingPage.tsx      <-- Production landing page & feature overview
+│   │   ├── App.tsx                  <-- React Router configuration & global layout
+│   │   ├── main.tsx                 <-- Application bootstrap entry point
+│   │   └── index.css                <-- Tailwind CSS base directives & print styling
 │   ├── index.html
 │   ├── tsconfig.json
 │   ├── vite.config.ts
@@ -330,7 +323,7 @@ StellarFlow/
 
 # 🚀 Installation
 
-Clone the repository.
+1. Clone the repository.
 
 ```bash
 git clone https://github.com/Earth-Kumar-Roy/StellarFlowV2.git
@@ -340,7 +333,7 @@ git clone https://github.com/Earth-Kumar-Roy/StellarFlowV2.git
 cd StellarFlowV2
 ```
 
-Run smart contract tests and compile WASM bytecode.
+2. Run smart contract tests and compile WASM bytecode.
 
 ```bash
 cd contracts/escrow
@@ -348,7 +341,7 @@ cargo test
 cargo build --target wasm32-unknown-unknown --release
 ```
 
-Install and start the frontend.
+3. Install and start the frontend.
 
 ```bash
 cd ../../frontend
@@ -361,27 +354,23 @@ npm run dev
 # 🔒 Security
 
 - Non-custodial architecture — private keys never leave the user's Freighter extension
-- Soroban access controls — critical contract functions enforce `require_auth()` verification
+- Soroban access controls — critical contract functions enforce require_auth() verification
 - Deterministic smart contract execution — milestone releases and timeout refund logic executed immutably on the Stellar ledger
 - Contract verification available directly on the Stellar Expert Explorer
-
-Private keys never leave the user's wallet.
+- Private keys never leave the user's wallet.
 
 ---
 
 # 🌍 Deployment
 
 **Frontend**
-
-Vercel
+- Vercel
 
 **Blockchain**
-
-Stellar Testnet (Soroban)
+- Stellar Testnet (Soroban)
 
 **Contract Explorer**
-
-https://stellar.expert/explorer/testnet/contract/CCLQR3746SFXSBZT7MX7D7C2BEJ5TFGC5VBSFVJBF75B5MHDK7AH54IO
+- https://stellar.expert/explorer/testnet/contract/CCLQR3746SFXSBZT7MX7D7C2BEJ5TFGC5VBSFVJBF75B5MHDK7AH54IO
 
 ---
 
@@ -399,13 +388,11 @@ https://stellar.expert/explorer/testnet/contract/CCLQR3746SFXSBZT7MX7D7C2BEJ5TFG
 
 **Earth Kumar Roy**
 
-GitHub
+**GitHub**
+- https://github.com/Earth-Kumar-Roy
 
-https://github.com/Earth-Kumar-Roy
-
-Repository
-
-https://github.com/Earth-Kumar-Roy/StellarFlowV2
+**Repository**
+- https://github.com/Earth-Kumar-Roy/StellarFlowV2
 
 ---
 
@@ -420,10 +407,6 @@ https://github.com/Earth-Kumar-Roy/StellarFlowV2
 
 ---
 
-<div align="center">
-
-### ⭐ Thank you for exploring StellarFlow V2 ⭐
+⭐ Thank you for exploring StellarFlow V2 ⭐
 
 Built with precision by EKR for the global Web3 freelance and DAO ecosystem on Stellar Soroban.
-
-</div>
