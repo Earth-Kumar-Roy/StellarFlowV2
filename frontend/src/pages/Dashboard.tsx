@@ -1,13 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { EscrowCard } from '../components/EscrowCard';
+import { EscrowFilterBar, type StatusFilter, type SortOption } from '../components/EscrowFilterBar';
 import type { Escrow } from '../types/escrow';
+import { EscrowStatus } from '../types/escrow';
 import { 
   PlusCircle, 
   RefreshCw, 
   Layers, 
   MessageSquare,
-  ArrowRight
+  ArrowRight,
+  SearchX
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -24,6 +27,8 @@ interface DashboardProps {
   onRefundExpired: (targetEscrow?: Escrow) => void;
 }
 
+const MULTISIG_THRESHOLD = 5000;
+
 export const Dashboard: React.FC<DashboardProps> = ({
   escrow,
   userEscrows = [],
@@ -37,6 +42,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onClaimInactivityPayout,
   onRefundExpired,
 }) => {
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [sortOption, setSortOption] = useState<SortOption>('newest');
+
   // Merge live on-chain escrow with locally saved user escrows, filtered by participant/co-signer wallet
   const displayEscrows: Escrow[] = useMemo(() => {
     if (!publicKey) return [];
@@ -68,6 +77,68 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
     return Array.from(combinedMap.values());
   }, [escrow, userEscrows, publicKey]);
+
+  // Apply search query, status filtering, and sorting
+  const filteredEscrows: Escrow[] = useMemo(() => {
+    const now = Math.floor(Date.now() / 1000);
+
+    return displayEscrows
+      .filter((item) => {
+        // Keyword Search Filter
+        const query = searchTerm.trim().toLowerCase();
+        const matchesSearch =
+          !query ||
+          item.client?.toLowerCase().includes(query) ||
+          item.clientName?.toLowerCase().includes(query) ||
+          item.freelancer?.toLowerCase().includes(query) ||
+          item.freelancerName?.toLowerCase().includes(query) ||
+          item.milestones?.some((m) => m.description?.toLowerCase().includes(query));
+
+        if (!matchesSearch) return false;
+
+        // Calculate actual completion state
+        const totalAmountNum = parseFloat(item.totalAmount || '0');
+        const isMultiSig = totalAmountNum > MULTISIG_THRESHOLD;
+        const actualReleased = (item.milestones || []).reduce((acc, m) => {
+          const votesList = Array.isArray(m.votes) ? m.votes : [];
+          const isTrulyReleased = m.isCompleted && (!isMultiSig || votesList.length >= 2);
+          return isTrulyReleased
+            ? acc + parseFloat(m.amount || '0')
+            : acc + parseFloat(m.autoReleasedAmount || '0');
+        }, 0);
+
+        const isFullyReleased = totalAmountNum > 0 && actualReleased >= totalAmountNum;
+        const allCompleted = (item.milestones || []).length > 0 &&
+          (item.milestones || []).every((m) => {
+            const votesList = Array.isArray(m.votes) ? m.votes : [];
+            return m.isCompleted && (!isMultiSig || votesList.length >= 2);
+          });
+        const isSettled = isFullyReleased || allCompleted || item.status === EscrowStatus.Completed;
+        const isExpired = now >= item.deadline && !isSettled;
+        const isUnderReview = !isSettled && (item.milestones || []).some((m) => (m.isSubmitted || m.isInReview) && !m.isCompleted);
+
+        // Status Tabs Filter
+        if (statusFilter === 'all') return true;
+        if (statusFilter === 'completed') return isSettled;
+        if (statusFilter === 'under_review') return isUnderReview;
+        if (statusFilter === 'expired') return isExpired;
+        if (statusFilter === 'active') return !isSettled && !isExpired;
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortOption === 'highest_amount') {
+          return (parseFloat(b.totalAmount) || 0) - (parseFloat(a.totalAmount) || 0);
+        }
+        if (sortOption === 'deadline') {
+          return a.deadline - b.deadline;
+        }
+        if (sortOption === 'oldest') {
+          return a.deadline - b.deadline;
+        }
+        // Default: Newest first (highest deadline timestamp / newest entry)
+        return b.deadline - a.deadline;
+      });
+  }, [displayEscrows, searchTerm, statusFilter, sortOption]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
@@ -112,6 +183,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
+      {/* Search & Filter Toolbar (Visible when wallet has escrows) */}
+      {displayEscrows.length > 0 && (
+        <EscrowFilterBar
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedStatus={statusFilter}
+          onStatusChange={setStatusFilter}
+          selectedSort={sortOption}
+          onSortChange={setSortOption}
+          totalCount={displayEscrows.length}
+          filteredCount={filteredEscrows.length}
+        />
+      )}
+
       {/* Main Content Area */}
       {isFetching && displayEscrows.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 bg-slate-900/40 border border-slate-800/80 rounded-3xl">
@@ -119,21 +204,43 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <p className="text-sm text-slate-300 font-medium">Querying Soroban Testnet RPC...</p>
         </div>
       ) : displayEscrows.length > 0 ? (
-        <div className="space-y-8">
-          {displayEscrows.map((escrowItem, idx) => (
-            <EscrowCard
-              key={`${escrowItem.client}_${escrowItem.deadline}_${idx}`}
-              escrow={escrowItem}
-              userAddress={publicKey}
-              isSubmitting={isSubmitting}
-              onSubmitWorkForReview={(id: number) => onSubmitWorkForReview(id, escrowItem)}
-              onApproveMilestone={(id: number) => onApproveMilestone(id, escrowItem)}
-              onDenyMilestone={(id: number, reason: string) => onDenyMilestone?.(id, reason, escrowItem)}
-              onClaimInactivityPayout={(id: number) => onClaimInactivityPayout?.(id, escrowItem)}
-              onRefundExpired={() => onRefundExpired(escrowItem)}
-            />
-          ))}
-        </div>
+        filteredEscrows.length > 0 ? (
+          <div className="space-y-8">
+            {filteredEscrows.map((escrowItem, idx) => (
+              <EscrowCard
+                key={`${escrowItem.client}_${escrowItem.deadline}_${idx}`}
+                escrow={escrowItem}
+                userAddress={publicKey}
+                isSubmitting={isSubmitting}
+                onSubmitWorkForReview={(id: number) => onSubmitWorkForReview(id, escrowItem)}
+                onApproveMilestone={(id: number) => onApproveMilestone(id, escrowItem)}
+                onDenyMilestone={(id: number, reason: string) => onDenyMilestone?.(id, reason, escrowItem)}
+                onClaimInactivityPayout={(id: number) => onClaimInactivityPayout?.(id, escrowItem)}
+                onRefundExpired={() => onRefundExpired(escrowItem)}
+              />
+            ))}
+          </div>
+        ) : (
+          /* Filter No Results State */
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-slate-900/40 border border-slate-800/80 rounded-3xl space-y-3">
+            <div className="p-3.5 bg-slate-800/80 text-slate-400 rounded-2xl border border-slate-700">
+              <SearchX className="w-8 h-8 text-indigo-400" />
+            </div>
+            <h3 className="text-lg font-bold text-white">No Matching Agreements</h3>
+            <p className="text-xs text-slate-400 max-w-sm">
+              No escrow vaults match your active filter or search query. Try clearing the search or changing the status filter tab.
+            </p>
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setStatusFilter('all');
+              }}
+              className="mt-2 text-xs font-mono font-semibold text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+            >
+              Reset All Filters
+            </button>
+          </div>
+        )
       ) : (
         /* Empty State */
         <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-slate-900/40 border border-slate-800/80 rounded-3xl space-y-5">

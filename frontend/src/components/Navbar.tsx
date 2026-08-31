@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   Wallet, 
@@ -13,9 +13,12 @@ import {
   ShieldCheck, 
   Eye,
   Home,
-  ExternalLink
+  ExternalLink,
+  Globe
 } from 'lucide-react';
 import type { Escrow } from '../types/escrow';
+
+export type DisplayCurrency = 'NATIVE' | 'USD' | 'EUR' | 'INR';
 
 interface NavbarProps {
   publicKey: string | null;
@@ -34,6 +37,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   onConnect,
   onDisconnect,
 }) => {
+  const [selectedCurrency, setSelectedCurrency] = useState<DisplayCurrency>('NATIVE');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('stellarflow_currency') as DisplayCurrency;
+    if (saved) setSelectedCurrency(saved);
+  }, []);
+
+  const handleCurrencyChange = (curr: DisplayCurrency) => {
+    setSelectedCurrency(curr);
+    localStorage.setItem('stellarflow_currency', curr);
+    // Broadcast currency change event across the DOM
+    window.dispatchEvent(new CustomEvent('currencyChange', { detail: curr }));
+  };
+
   const formatAddress = (addr: string) =>
     `${addr.substring(0, 5)}...${addr.substring(addr.length - 4)}`;
 
@@ -99,8 +116,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             </NavLink>
 
-            {/* Mobile Wallet Button trigger */}
-            <div className="md:hidden">
+            {/* Mobile Wallet & Currency Controls */}
+            <div className="md:hidden flex items-center space-x-2">
+              <select
+                value={selectedCurrency}
+                onChange={(e) => handleCurrencyChange(e.target.value as DisplayCurrency)}
+                className="bg-slate-800 text-slate-300 border border-slate-700 text-xs rounded-lg px-2 py-1.5 focus:outline-none font-mono"
+              >
+                <option value="NATIVE">Native</option>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="INR">INR (₹)</option>
+              </select>
+
               {publicKey ? (
                 <button
                   onClick={onDisconnect}
@@ -121,7 +149,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
-          {/* Navigation Links (6 Top Nav Items) */}
+          {/* Navigation Links */}
           <nav className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none">
             <NavLink to="/" className={navLinkStyle} end>
               <Home className="w-4 h-4" />
@@ -149,11 +177,26 @@ export const Navbar: React.FC<NavbarProps> = ({
             </NavLink>
           </nav>
 
-          {/* Wallet & Balance Display */}
-          <div className="hidden md:flex items-center space-x-3">
+          {/* Wallet & Multi-Currency Display */}
+          <div className="hidden md:flex items-center space-x-2.5">
+            
+            {/* Multi-Currency Conversion Selector */}
+            <div className="flex items-center space-x-1.5 bg-slate-800/90 border border-slate-700/80 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-300 font-mono">
+              <Globe className="w-3.5 h-3.5 text-indigo-400" />
+              <select
+                value={selectedCurrency}
+                onChange={(e) => handleCurrencyChange(e.target.value as DisplayCurrency)}
+                className="bg-transparent text-white focus:outline-none cursor-pointer pr-1"
+              >
+                <option value="NATIVE" className="bg-slate-900">Native Token</option>
+                <option value="USD" className="bg-slate-900">USD ($)</option>
+                <option value="EUR" className="bg-slate-900">EUR (€)</option>
+                <option value="INR" className="bg-slate-900">INR (₹)</option>
+              </select>
+            </div>
+
             {publicKey ? (
-              <div className="flex items-center space-x-2.5">
-                
+              <div className="flex items-center space-x-2">
                 {/* Role Context Badge */}
                 {role && (
                   <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${role.color}`}>
@@ -179,7 +222,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {/* Disconnect Button */}
                 <button
                   onClick={onDisconnect}
-                  className="p-2 bg-slate-800 hover:bg-slate-700/80 hover:text-red-400 text-slate-400 rounded-xl transition duration-150 border border-slate-700/70"
+                  className="p-2 bg-slate-800 hover:bg-slate-700/80 hover:text-red-400 text-slate-400 rounded-xl transition duration-150 border border-slate-700/70 cursor-pointer"
                   title="Disconnect Wallet"
                 >
                   <LogOut className="w-4 h-4" />
@@ -189,7 +232,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 onClick={onConnect}
                 disabled={isLoading}
-                className="flex items-center space-x-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-indigo-600/25 active:scale-95"
+                className="flex items-center space-x-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-indigo-600/25 active:scale-95 cursor-pointer"
               >
                 <Wallet className="w-4 h-4" />
                 <span>{isLoading ? 'Connecting...' : 'Connect Wallet'}</span>
